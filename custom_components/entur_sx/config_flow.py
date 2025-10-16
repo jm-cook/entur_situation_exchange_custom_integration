@@ -128,12 +128,14 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 return await self.async_step_select_lines()
 
-        # Construct default device name: "<Operator> Avvik"
-        # e.g., "Skyss Avvik", "Ruter Avvik", etc.
+        # Construct default device name: "<Operator> <Disruption/Avvik>"
+        # The suffix is automatically translated based on HA language
+        # e.g., "Skyss Disruption" (English) or "Skyss Avvik" (Norwegian)
+        suffix = self.hass.localize("component.entur_sx.entity.sensor.disruption.name") or "Disruption"
         if self._operator_name:
-            default_name = f"{self._operator_name} {DEFAULT_DEVICE_NAME_SUFFIX}"
+            default_name = f"{self._operator_name} {suffix}"
         else:
-            default_name = DEFAULT_DEVICE_NAME
+            default_name = f"Entur {suffix}"
 
         # Show the form
         data_schema = vol.Schema(

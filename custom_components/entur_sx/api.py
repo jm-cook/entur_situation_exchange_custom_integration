@@ -175,7 +175,7 @@ class EnturSXApiClient:
                                         "summary": summary,
                                         "description": description,
                                         "status": status,
-                                        "progress": progress,  # Keep original for reference
+                                        "progress": progress.lower(),  # Normalize to lowercase
                                     })
                                     # Don't break - a situation might affect the same line multiple times
                                     # (though unlikely, we should handle it)
@@ -191,7 +191,7 @@ class EnturSXApiClient:
                         "summary": STATE_NORMAL,
                         "description": STATE_NORMAL,
                         "status": STATUS_OPEN,
-                        "progress": "NORMAL",
+                        "progress": "normal",
                     })
 
                 allitems_dict[look_for] = items
@@ -205,7 +205,7 @@ class EnturSXApiClient:
                     "summary": STATE_NORMAL,
                     "description": STATE_NORMAL,
                     "status": STATUS_OPEN,
-                    "progress": "ERROR",
+                    "progress": "error",
                 }]
 
         _LOGGER.debug("Parsed deviations for %d lines", len(allitems_dict))

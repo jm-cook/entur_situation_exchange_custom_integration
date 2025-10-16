@@ -58,5 +58,12 @@
       "no_lines": "Du må velge minst én linje",
       "cannot_connect": "Kunne ikke koble til Entur API"
     }
+  },
+  "entity": {
+    "sensor": {
+      "disruption": {
+        "name": "Avvik"
+      }
+    }
   }
 }

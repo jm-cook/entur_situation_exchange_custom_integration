@@ -7,8 +7,7 @@ CONF_LINES_TO_CHECK = "lines_to_check"
 CONF_DEVICE_NAME = "device_name"
 
 # Defaults
-DEFAULT_DEVICE_NAME = "Entur Avvik"
-DEFAULT_DEVICE_NAME_SUFFIX = "Avvik"  # Suffix for operator-based device names
+DEFAULT_DEVICE_NAME = "Entur Disruption"  # Fallback only, translations preferred
 UPDATE_INTERVAL = 60  # seconds
 
 # API
