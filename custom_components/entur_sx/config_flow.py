@@ -66,6 +66,7 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._operator = user_input[CONF_OPERATOR]
             self._operator_name = self._operators.get(self._operator, "")
+            _LOGGER.debug("Selected operator: %s (name: %s)", self._operator, self._operator_name)
             
             # Move to device name step
             return await self.async_step_device_name()
@@ -116,9 +117,11 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             
             # Fetch lines for the selected operator
             session = async_get_clientsession(self.hass)
+            _LOGGER.debug("Fetching lines for operator: %s", self._operator)
             self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
                 session, self._operator
             )
+            _LOGGER.debug("Found %d lines for operator %s", len(self._available_lines), self._operator)
             
             if not self._available_lines:
                 errors["base"] = "no_lines_found"
