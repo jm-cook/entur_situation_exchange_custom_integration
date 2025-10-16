@@ -19,6 +19,7 @@ from .const import (
     CONF_LINES_TO_CHECK,
     CONF_OPERATOR,
     DEFAULT_DEVICE_NAME,
+    DEFAULT_DEVICE_NAME_SUFFIX,
     DOMAIN,
 )
 
@@ -123,8 +124,12 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 return await self.async_step_select_lines()
 
-        # Default device name to operator name
-        default_name = self._operator_name or DEFAULT_DEVICE_NAME
+        # Construct default device name: "<Operator> Avvik"
+        # e.g., "Skyss Avvik", "Ruter Avvik", etc.
+        if self._operator_name:
+            default_name = f"{self._operator_name} {DEFAULT_DEVICE_NAME_SUFFIX}"
+        else:
+            default_name = DEFAULT_DEVICE_NAME
 
         # Show the form
         data_schema = vol.Schema(

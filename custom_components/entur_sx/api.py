@@ -9,7 +9,7 @@ from typing import Any
 import aiohttp
 import async_timeout
 
-from .const import API_BASE_URL, API_GRAPHQL_URL, STATE_NORMAL, STATUS_EXPIRED, STATUS_PLANNED, STATUS_OPEN
+from .const import API_BASE_URL, API_GRAPHQL_URL, CODESPACE_NAMES, STATE_NORMAL, STATUS_EXPIRED, STATUS_PLANNED, STATUS_OPEN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,26 +25,19 @@ class EnturSXApiClient:
         """Initialize the API client.
         
         Args:
-            operator: Full authority ID (e.g., "SKY:Authority:SKY") or operator code (e.g., "SKY")
+            operator: Codespace (e.g., "SKY", "SOF")
             lines: List of line IDs to monitor
         """
         self._operator = operator
         self._lines = lines or []
         self._session: aiohttp.ClientSession | None = None
 
-        # Extract operator code for SX REST API
-        # GraphQL uses full ID (SKY:Authority:SKY), but SX REST API uses just code (SKY)
+        # The operator is now the codespace directly (e.g., "SKY", "SOF")
+        # This is what we use for the SIRI-SX datasetId parameter
+        self._operator_code = operator if operator else None
+        
         if operator:
-            if ":Authority:" in operator:
-                # Extract the code from full authority ID
-                # Format: "SKY:Authority:SKY" -> "SKY"
-                parts = operator.split(":")
-                operator_code = parts[-1] if parts else operator
-            else:
-                # Already just a code
-                operator_code = operator
-            
-            self._service_url = f"{API_BASE_URL}?datasetId={operator_code}"
+            self._service_url = f"{API_BASE_URL}?datasetId={operator}"
         else:
             self._service_url = API_BASE_URL
 
@@ -220,14 +213,17 @@ class EnturSXApiClient:
 
     @staticmethod
     async def async_get_operators(session: aiohttp.ClientSession) -> dict[str, str]:
-        """Fetch list of operators from Entur GraphQL API.
+        """Fetch list of operators (codespaces) from Entur GraphQL API.
+        
+        Extracts all unique 3-letter codespaces from the operators API and maps them
+        to friendly names. Falls back to CODESPACE_NAMES constant for better naming.
         
         Returns:
-            Dict mapping operator code to friendly name, e.g. {"SKY": "Skyss", "RUT": "Ruter"}
+            Dict mapping codespace to display name, e.g. {"SKY": "Skyss (SKY)", "SOF": "Sogn og Fjordane (SOF)"}
         """
         query = """
         query {
-          authorities {
+          operators {
             id
             name
           }
@@ -249,73 +245,79 @@ class EnturSXApiClient:
                     response.raise_for_status()
                     data = await response.json()
 
-                    operators = {}
-                    authorities = data.get("data", {}).get("authorities", [])
+                    all_operators = data.get("data", {}).get("operators", [])
                     
-                    for authority in authorities:
-                        authority_id = authority.get("id", "")
-                        authority_name = authority.get("name", "")
+                    # Extract unique codespaces and find best names
+                    codespace_names = {}
+                    
+                    for operator in all_operators:
+                        op_id = operator.get("id", "")
+                        op_name = operator.get("name", "")
                         
-                        if not authority_id or not authority_name:
+                        if not op_id:
                             continue
                         
-                        # Filter out non-transit operators
-                        # Skip entries that don't follow the standard Authority pattern
-                        # Standard format: "XXX:Authority:CODE" where XXX is the operator prefix
-                        if ":Authority:" not in authority_id:
-                            _LOGGER.debug("Skipping non-standard authority: %s", authority_id)
-                            continue
-                        
-                        # Skip known non-transit authorities (ambulance routes, etc.)
-                        # These typically have codes like "AM008" or similar patterns
-                        if "AMBU" in authority_name.upper() or authority_id.startswith("MOR:Authority:AM"):
-                            _LOGGER.debug("Skipping non-transit authority: %s - %s", authority_id, authority_name)
-                            continue
-                        
-                        # Use the full authority ID as the key
-                        # This is required for the lines query to work correctly
-                        operators[authority_id] = authority_name
-
-                    _LOGGER.debug("Found %d operators", len(operators))
+                        # Extract codespace (first part before colon)
+                        if ":" in op_id:
+                            parts = op_id.split(":")
+                            codespace = parts[0]
+                            
+                            # Only include 3-letter uppercase codespaces
+                            if len(codespace) == 3 and codespace.isupper():
+                                # Prefer canonical operator names (XXX:Operator:XXX)
+                                is_canonical = (len(parts) == 3 and 
+                                              parts[0] == parts[2] and 
+                                              parts[1] == "Operator")
+                                
+                                if is_canonical or codespace not in codespace_names:
+                                    # Use CODESPACE_NAMES if available, otherwise API name
+                                    friendly_name = CODESPACE_NAMES.get(codespace, op_name)
+                                    codespace_names[codespace] = friendly_name
+                    
+                    # Build final operator dict with display names
+                    operators = {}
+                    for codespace in sorted(codespace_names.keys()):
+                        friendly_name = codespace_names[codespace]
+                        display_name = f"{friendly_name} ({codespace})"
+                        operators[codespace] = display_name
+                    
+                    _LOGGER.debug("Found %d operators from GraphQL API", len(operators))
                     return operators
 
         except Exception as err:
-            _LOGGER.error("Error fetching operators: %s", err, exc_info=True)
-            # Return fallback list with full authority IDs
-            return {
-                "SKY:Authority:SKY": "Skyss",
-                "RUT:Authority:RUT": "Ruter",
-                "ATB:Authority:ATB": "AtB",
-                "KOL:Authority:KOL": "Kolumbus",
-                "TRO:Authority:TRO": "Troms fylkestrafikk",
-                "NOR:Authority:NOR": "Nordland fylkeskommune",
-            }
+            _LOGGER.error("Error fetching operators from GraphQL: %s", err, exc_info=True)
+            # Fallback to CODESPACE_NAMES constant
+            _LOGGER.info("Falling back to CODESPACE_NAMES constant")
+            operators = {}
+            for codespace, friendly_name in sorted(CODESPACE_NAMES.items()):
+                display_name = f"{friendly_name} ({codespace})"
+                operators[codespace] = display_name
+            return operators
 
     @staticmethod
     async def async_get_lines_for_operator(
         session: aiohttp.ClientSession, operator: str
     ) -> dict[str, str]:
-        """Fetch list of lines for a specific operator from Entur GraphQL API.
+        """Fetch list of lines for a specific operator (codespace) from Entur GraphQL API.
         
         Args:
             session: aiohttp session
-            operator: Full authority ID (e.g., "SKY:Authority:SKY")
+            operator: Codespace (e.g., "SKY", "SOF")
             
         Returns:
             Dict mapping line ref to line name, e.g. {"SKY:Line:1": "Line 1 - Bergen sentrum"}
         """
-        # Use the authority query to get lines
-        # This is more reliable than the lines query with authorities filter
+        # Query all lines and filter by codespace
+        # We can't use authority query since we only have the codespace now
         query = """
-        query($authority: String!) {
-          authority(id: $authority) {
+        query {
+          lines {
             id
             name
-            lines {
+            publicCode
+            transportMode
+            authority {
               id
-              name
-              publicCode
-              transportMode
             }
           }
         }
@@ -327,43 +329,42 @@ class EnturSXApiClient:
         }
 
         try:
-            async with async_timeout.timeout(10):
+            async with async_timeout.timeout(30):
                 async with session.post(
                     API_GRAPHQL_URL,
-                    json={"query": query, "variables": {"authority": operator}},
+                    json={"query": query},
                     headers=headers,
                 ) as response:
                     response.raise_for_status()
                     data = await response.json()
 
                     lines = {}
-                    authority = data.get("data", {}).get("authority")
+                    all_lines = data.get("data", {}).get("lines", [])
                     
-                    if not authority:
-                        _LOGGER.warning("Authority not found: %s", operator)
-                        return {}
-                    
-                    line_list = authority.get("lines", [])
-                    
-                    for line in line_list:
+                    # Filter lines by codespace
+                    for line in all_lines:
                         line_id = line.get("id", "")
+                        
+                        # Check if line belongs to this codespace
+                        if not line_id.startswith(f"{operator}:"):
+                            continue
+                        
                         line_name = line.get("name", "")
                         public_code = line.get("publicCode", "")
                         transport_mode = line.get("transportMode", "")
                         
-                        if line_id:
-                            # Create a friendly display name
-                            display_name = f"{public_code}"
-                            if line_name:
-                                display_name += f" - {line_name}"
-                            if transport_mode:
-                                display_name += f" ({transport_mode})"
-                            
-                            lines[line_id] = display_name
+                        # Create a friendly display name
+                        display_name = f"{public_code}"
+                        if line_name:
+                            display_name += f" - {line_name}"
+                        if transport_mode:
+                            display_name += f" ({transport_mode})"
+                        
+                        lines[line_id] = display_name
 
-                    _LOGGER.debug("Found %d lines for authority %s", len(lines), operator)
+                    _LOGGER.debug("Found %d lines for codespace %s", len(lines), operator)
                     return lines
 
         except Exception as err:
-            _LOGGER.error("Error fetching lines for authority %s: %s", operator, err, exc_info=True)
+            _LOGGER.error("Error fetching lines for codespace %s: %s", operator, err, exc_info=True)
             return {}
