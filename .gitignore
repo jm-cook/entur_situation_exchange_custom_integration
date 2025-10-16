@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Test files
+test_api.py
+test_api_fix.py
+test_fixed_api.py
+test_final.py
+response_*.json
+
+# Build artifacts
+entur_sx.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

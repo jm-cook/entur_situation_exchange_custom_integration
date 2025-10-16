@@ -233,30 +233,39 @@ class EnturSXApiClient:
                         authority_id = authority.get("id", "")
                         authority_name = authority.get("name", "")
                         
-                        # Extract the operator code from the authority ID
-                        # Format is usually like "NSR:Authority:SKY" or similar
-                        if ":" in authority_id:
-                            parts = authority_id.split(":")
-                            operator_code = parts[-1] if parts else authority_id
-                        else:
-                            operator_code = authority_id
+                        if not authority_id or not authority_name:
+                            continue
                         
-                        if operator_code and authority_name:
-                            operators[operator_code] = authority_name
+                        # Filter out non-transit operators
+                        # Skip entries that don't follow the standard Authority pattern
+                        # Standard format: "XXX:Authority:CODE" where XXX is the operator prefix
+                        if ":Authority:" not in authority_id:
+                            _LOGGER.debug("Skipping non-standard authority: %s", authority_id)
+                            continue
+                        
+                        # Skip known non-transit authorities (ambulance routes, etc.)
+                        # These typically have codes like "AM008" or similar patterns
+                        if "AMBU" in authority_name.upper() or authority_id.startswith("MOR:Authority:AM"):
+                            _LOGGER.debug("Skipping non-transit authority: %s - %s", authority_id, authority_name)
+                            continue
+                        
+                        # Use the full authority ID as the key
+                        # This is required for the lines query to work correctly
+                        operators[authority_id] = authority_name
 
                     _LOGGER.debug("Found %d operators", len(operators))
                     return operators
 
         except Exception as err:
             _LOGGER.error("Error fetching operators: %s", err, exc_info=True)
-            # Return fallback list
+            # Return fallback list with full authority IDs
             return {
-                "SKY": "Skyss",
-                "RUT": "Ruter",
-                "ATB": "AtB",
-                "KOL": "Kolumbus",
-                "TRO": "Troms fylkestrafikk",
-                "NOR": "Nordland fylkeskommune",
+                "SKY:Authority:SKY": "Skyss",
+                "RUT:Authority:RUT": "Ruter",
+                "ATB:Authority:ATB": "AtB",
+                "KOL:Authority:KOL": "Kolumbus",
+                "TRO:Authority:TRO": "Troms fylkestrafikk",
+                "NOR:Authority:NOR": "Nordland fylkeskommune",
             }
 
     @staticmethod
@@ -267,25 +276,27 @@ class EnturSXApiClient:
         
         Args:
             session: aiohttp session
-            operator: Operator code (e.g., "SKY")
+            operator: Full authority ID (e.g., "SKY:Authority:SKY")
             
         Returns:
             Dict mapping line ref to line name, e.g. {"SKY:Line:1": "Line 1 - Bergen sentrum"}
         """
-        # Build authority filter - need to find the full authority ID
+        # Use the authority query to get lines
+        # This is more reliable than the lines query with authorities filter
         query = """
         query($authority: String!) {
-          lines(authorities: [$authority]) {
+          authority(id: $authority) {
             id
             name
-            publicCode
-            transportMode
+            lines {
+              id
+              name
+              publicCode
+              transportMode
+            }
           }
         }
         """
-
-        # Construct the full authority ID
-        authority_id = f"NSR:Authority:{operator}"
 
         headers = {
             "Content-Type": "application/json",
@@ -296,14 +307,20 @@ class EnturSXApiClient:
             async with async_timeout.timeout(10):
                 async with session.post(
                     API_GRAPHQL_URL,
-                    json={"query": query, "variables": {"authority": authority_id}},
+                    json={"query": query, "variables": {"authority": operator}},
                     headers=headers,
                 ) as response:
                     response.raise_for_status()
                     data = await response.json()
 
                     lines = {}
-                    line_list = data.get("data", {}).get("lines", [])
+                    authority = data.get("data", {}).get("authority")
+                    
+                    if not authority:
+                        _LOGGER.warning("Authority not found: %s", operator)
+                        return {}
+                    
+                    line_list = authority.get("lines", [])
                     
                     for line in line_list:
                         line_id = line.get("id", "")
@@ -321,9 +338,9 @@ class EnturSXApiClient:
                             
                             lines[line_id] = display_name
 
-                    _LOGGER.debug("Found %d lines for operator %s", len(lines), operator)
+                    _LOGGER.debug("Found %d lines for authority %s", len(lines), operator)
                     return lines
 
         except Exception as err:
-            _LOGGER.error("Error fetching lines for operator %s: %s", operator, err, exc_info=True)
+            _LOGGER.error("Error fetching lines for authority %s: %s", operator, err, exc_info=True)
             return {}
