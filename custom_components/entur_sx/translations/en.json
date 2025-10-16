@@ -1,0 +1,44 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Entur Situation Exchange",
+        "description": "Monitor service deviations for specific transit lines.",
+        "data": {
+          "device_name": "Device name"
+        },
+        "data_description": {
+          "device_name": "A name for this collection of monitored lines"
+        }
+      },
+      "select_operator": {
+        "title": "Select Operator",
+        "description": "Choose the public transport operator for {device_name}",
+        "data": {
+          "operator": "Operator"
+        },
+        "data_description": {
+          "operator": "Select the public transport company"
+        }
+      },
+      "select_lines": {
+        "title": "Select Lines to Monitor",
+        "description": "Choose which lines to monitor for {operator}",
+        "data": {
+          "lines_to_check": "Lines to monitor"
+        },
+        "data_description": {
+          "lines_to_check": "Select one or more lines to track"
+        }
+      }
+    },
+    "error": {
+      "no_lines": "You must select at least one line to monitor",
+      "cannot_connect": "Failed to connect to Entur API",
+      "no_lines_found": "No lines found for this operator"
+    },
+    "abort": {
+      "already_configured": "This combination of operator and lines is already configured"
+    }
+  }
+}
