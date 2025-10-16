@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -22,6 +23,23 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _extract_line_number(line_display_name: str) -> tuple[int, str]:
+    """Extract numeric line number for sorting.
+    
+    Args:
+        line_display_name: Display name like "925 - Bergen-Nordheimsund (bus)"
+        
+    Returns:
+        Tuple of (line_number, original_name) for sorting
+    """
+    # Try to extract leading number from the display name
+    match = re.match(r'^(\d+)', line_display_name)
+    if match:
+        return (int(match.group(1)), line_display_name)
+    # If no number, sort alphabetically at the end
+    return (999999, line_display_name)
 
 
 class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -90,11 +108,11 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 return await self.async_step_select_lines()
 
-        # Create operator options with friendly names
+        # Create operator options with friendly names, sorted alphabetically by name
         operator_options = [
             selector.SelectOptionDict(
                 value=code,
-                label=f"{code} - {name}"
+                label=f"{name} ({code.split(':')[-1]})"
             )
             for code, name in sorted(self._operators.items(), key=lambda x: x[1])
         ]
@@ -146,7 +164,7 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     },
                 )
 
-        # Create line options with friendly names
+        # Create line options with friendly names, sorted numerically by line number
         line_options = [
             selector.SelectOptionDict(
                 value=line_id,
@@ -154,7 +172,7 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             for line_id, line_name in sorted(
                 self._available_lines.items(), 
-                key=lambda x: x[1]
+                key=lambda x: _extract_line_number(x[1])
             )
         ]
 
@@ -194,7 +212,6 @@ class EnturSXOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
         self._available_lines: dict[str, str] = {}
 
     async def async_step_init(
@@ -214,7 +231,11 @@ class EnturSXOptionsFlow(config_entries.OptionsFlow):
 
         # Get current operator from config entry
         operator = self.config_entry.data.get(CONF_OPERATOR)
-        current_lines = self.config_entry.data.get(CONF_LINES_TO_CHECK, [])
+        # Check both data and options for current lines (options takes precedence)
+        current_lines = self.config_entry.options.get(
+            CONF_LINES_TO_CHECK,
+            self.config_entry.data.get(CONF_LINES_TO_CHECK, [])
+        )
 
         # Fetch available lines for the operator
         session = async_get_clientsession(self.hass)
@@ -232,7 +253,7 @@ class EnturSXOptionsFlow(config_entries.OptionsFlow):
         if errors:
             return self.async_abort(reason=errors.get("base", "unknown"))
 
-        # Create line options with friendly names
+        # Create line options with friendly names, sorted numerically by line number
         line_options = [
             selector.SelectOptionDict(
                 value=line_id,
@@ -240,7 +261,7 @@ class EnturSXOptionsFlow(config_entries.OptionsFlow):
             )
             for line_id, line_name in sorted(
                 self._available_lines.items(), 
-                key=lambda x: x[1]
+                key=lambda x: _extract_line_number(x[1])
             )
         ]
 
