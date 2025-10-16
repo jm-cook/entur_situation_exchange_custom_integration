@@ -79,10 +79,11 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
 
         # Create operator options with friendly names, sorted alphabetically by name
+        # Note: name already includes codespace in format "Friendly Name (CODE)"
         operator_options = [
             selector.SelectOptionDict(
                 value=code,
-                label=f"{name} ({code.split(':')[-1]})"
+                label=name
             )
             for code, name in sorted(self._operators.items(), key=lambda x: x[1])
         ]
