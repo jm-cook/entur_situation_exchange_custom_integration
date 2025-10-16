@@ -43,7 +43,7 @@ STATUS_EXPIRED = "expired"
 # Source: Official Entur codespace documentation + dynamic discovery from operators API
 # The codespace (3-letter code) is what's used in SIRI-SX datasetId parameter
 CODESPACE_NAMES = {
-    # Regional transport authorities (from GraphQL authorities API)
+    # Major regional transport authorities
     "AKT": "Agder Kollektivtrafikk",
     "ATB": "AtB",
     "BRA": "Brakar",
@@ -56,7 +56,7 @@ CODESPACE_NAMES = {
     "RUT": "Ruter",
     "SJN": "SJ Nord",
     "SKY": "Skyss",
-    "SOF": "Sogn og Fjordane",  # Note: GraphQL returns "Skyss" but this is the regional authority
+    "SOF": "Sogn og Fjordane",  # Kringom regional authority
     "TEL": "Farte",
     "TRO": "Troms fylkestrafikk",
     "VKT": "VKT",
