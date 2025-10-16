@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -25,8 +26,33 @@ async def async_setup_entry(
     """Set up Entur SX sensors from a config entry."""
     coordinator: EnturSXDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
-    # Get the list of lines to monitor
-    lines = entry.data.get("lines_to_check", [])
+    # Get the list of lines to monitor - merge data and options (options takes precedence)
+    config_data = {**entry.data, **entry.options}
+    lines = config_data.get("lines_to_check", [])
+
+    # Clean up entities for lines that are no longer configured
+    entity_registry = er.async_get(hass)
+    
+    # Get all entities for this config entry
+    current_entities = er.async_entries_for_config_entry(
+        entity_registry, entry.entry_id
+    )
+    
+    # Build set of expected unique IDs
+    expected_unique_ids = {
+        f"{entry.entry_id}_{line_ref.replace(':', '_')}" 
+        for line_ref in lines
+    }
+    
+    # Remove entities that are no longer configured
+    for entity_entry in current_entities:
+        if entity_entry.unique_id not in expected_unique_ids:
+            _LOGGER.info(
+                "Removing entity %s (unique_id: %s) - line no longer configured",
+                entity_entry.entity_id,
+                entity_entry.unique_id,
+            )
+            entity_registry.async_remove(entity_entry.entity_id)
 
     # Create a sensor for each line
     entities = []
@@ -56,7 +82,7 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         self.line_ref = line_ref
         self.line_name = line_name
 
-        device_name = entry.data.get(CONF_DEVICE_NAME, "Entur Deviations")
+        device_name = entry.data.get(CONF_DEVICE_NAME, "Entur Avvik")
 
         # Unique ID
         self._attr_unique_id = f"{entry.entry_id}_{line_name}"

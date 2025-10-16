@@ -23,9 +23,14 @@ self.config_entry = config_entry
 ### 2. New Lines Not Getting Added
 **Problem:** When adding new lines in the options flow, they weren't being saved properly.
 
-**Root Cause:** The options flow was only checking `entry.data` for current lines, not `entry.options` where updated values are stored.
+**Root Causes:** 
+1. The options flow was only checking `entry.data` for current lines, not `entry.options` where updated values are stored
+2. **The sensor platform was only reading from `entry.data`, not `entry.options`!**
 
-**Solution:** Check `entry.options` first, then fall back to `entry.data`:
+**Solutions:**
+
+**In `config_flow.py` - Options Flow:**
+Check `entry.options` first, then fall back to `entry.data`:
 
 ```python
 # Check both data and options for current lines (options takes precedence)
@@ -35,11 +40,28 @@ current_lines = self.config_entry.options.get(
 )
 ```
 
+**In `sensor.py` - Sensor Setup:**
+Merge data and options before reading lines:
+
+```python
+# Get the list of lines to monitor - merge data and options (options takes precedence)
+config_data = {**entry.data, **entry.options}
+lines = config_data.get("lines_to_check", [])
+```
+
+**Why This Was The Issue:**
+- Options flow correctly saved new lines to `entry.options`
+- Integration reload (`__init__.py`) correctly merged and passed lines to API client
+- **BUT** sensor platform setup only looked at `entry.data`
+- Result: API fetched data for all lines, but sensors only created for original lines
+- New line data was fetched but not displayed!
+
 **Why This Works:**
 - Initial setup stores lines in `entry.data`
 - Options flow updates store lines in `entry.options`
-- `__init__.py` merges both: `{**entry.data, **entry.options}` (options override data)
-- Now the UI correctly shows the current effective line selection
+- Both `__init__.py` and `sensor.py` now merge: `{**entry.data, **entry.options}` (options override data)
+- All three places consistently use the same merged config
+- Sensors are now created for all current lines after options flow changes
 
 ---
 
@@ -133,6 +155,39 @@ def _extract_line_number(line_display_name: str) -> tuple[int, str]:
 **Changes in `EnturSXConfigFlow.async_step_select_lines()`:**
 - ✅ Fixed: Sort lines numerically with `_extract_line_number()`
 
+### `custom_components/entur_sx/sensor.py`
+
+**Imports Added:**
+```python
+from homeassistant.helpers import entity_registry as er
+```
+
+**Changes in `async_setup_entry()`:**
+
+1. **Fixed data/options merge:**
+   - ❌ Old: `lines = entry.data.get("lines_to_check", [])`
+   - ✅ New: Merge data and options first:
+     ```python
+     config_data = {**entry.data, **entry.options}
+     lines = config_data.get("lines_to_check", [])
+     ```
+   - **This was the critical fix!** Without this, sensors weren't created for newly added lines.
+
+2. **Added entity cleanup:**
+   - Gets all existing entities from entity registry
+   - Compares to currently configured lines
+   - Removes entities for lines that are no longer configured
+   - Prevents "Unavailable" sensors from cluttering the UI
+   
+**Code Flow:**
+```
+1. Get entity registry
+2. Get all current entities for this config entry
+3. Build set of expected unique IDs based on configured lines
+4. Remove entities not in expected set
+5. Create new entities for configured lines
+```
+
 ---
 
 ## Testing Checklist
@@ -142,11 +197,14 @@ def _extract_line_number(line_display_name: str) -> tuple[int, str]:
 - [ ] Options flow: "Configure" button appears in Devices & Services
 - [ ] Options flow: Current line selection is pre-checked
 - [ ] Options flow: Can add new lines
+- [ ] Options flow: New lines appear as sensors after save
 - [ ] Options flow: Can remove lines
+- [ ] Options flow: Removed lines' sensors are deleted (not just unavailable)
 - [ ] Options flow: Changes persist after save
 - [ ] Options flow: Integration reloads with new line selection
 - [ ] Options flow: No deprecation warnings in logs
 - [ ] Sensors: Update to reflect new line configuration
+- [ ] Entity Registry: No orphaned "Unavailable" entities after line removal
 
 ---
 
@@ -198,3 +256,59 @@ No migration needed! The code handles both old and new formats:
 5. Merge pattern ensures both work: `{**entry.data, **entry.options}`
 
 This provides backward compatibility without any breaking changes.
+
+---
+
+## Entity Cleanup (Bonus Fix)
+
+### 5. Old Entities Remain "Unavailable" When Lines Are Removed
+
+**Problem:** When you remove lines from the configuration via options flow, the old sensors aren't deleted - they just show as "Unavailable" in Home Assistant.
+
+**Root Cause:** Home Assistant doesn't automatically remove entities when they're no longer created by the integration. Old entities persist in the entity registry.
+
+**Solution:** Added automatic entity cleanup in `sensor.py` that:
+1. Gets all existing entities for this config entry from the entity registry
+2. Compares them to the current configured lines
+3. Removes any entities that are no longer configured
+
+**Implementation:**
+
+```python
+# Clean up entities for lines that are no longer configured
+entity_registry = er.async_get(hass)
+
+# Get all entities for this config entry
+current_entities = er.async_entries_for_config_entry(
+    entity_registry, entry.entry_id
+)
+
+# Build set of expected unique IDs
+expected_unique_ids = {
+    f"{entry.entry_id}_{line_ref.replace(':', '_')}" 
+    for line_ref in lines
+}
+
+# Remove entities that are no longer configured
+for entity_entry in current_entities:
+    if entity_entry.unique_id not in expected_unique_ids:
+        _LOGGER.info(
+            "Removing entity %s (unique_id: %s) - line no longer configured",
+            entity_entry.entity_id,
+            entity_entry.unique_id,
+        )
+        entity_registry.async_remove(entity_entry.entity_id)
+```
+
+**Behavior:**
+- When you remove line 925 from options flow and save
+- Integration reloads and runs `async_setup_entry`
+- Cleanup logic identifies the line 925 sensor is no longer needed
+- Entity is automatically removed from the entity registry
+- No more "Unavailable" sensors cluttering your UI!
+
+**Logging:**
+```
+INFO: Removing entity sensor.test_device_sky_line_925 (unique_id: abc123_SKY_Line_925) - line no longer configured
+INFO: Setting up 2 Entur SX sensors
+```

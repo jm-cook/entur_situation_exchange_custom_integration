@@ -51,6 +51,7 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self._device_name: str | None = None
         self._operator: str | None = None
+        self._operator_name: str | None = None
         self._selected_lines: list[str] = []
         self._operators: dict[str, str] = {}
         self._available_lines: dict[str, str] = {}
@@ -58,55 +59,23 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the initial step - device name."""
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            self._device_name = user_input[CONF_DEVICE_NAME]
-            
-            # Fetch operators for next step
-            session = async_get_clientsession(self.hass)
-            self._operators = await EnturSXApiClient.async_get_operators(session)
-            
-            if not self._operators:
-                errors["base"] = "cannot_connect"
-            else:
-                return await self.async_step_select_operator()
-
-        # Show the form
-        data_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_DEVICE_NAME, default=DEFAULT_DEVICE_NAME
-                ): str,
-            }
-        )
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=data_schema,
-            errors=errors,
-        )
-
-    async def async_step_select_operator(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Handle operator selection step."""
+        """Handle the initial step - select operator."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
             self._operator = user_input[CONF_OPERATOR]
+            self._operator_name = self._operators.get(self._operator, "")
             
-            # Fetch lines for the selected operator
-            session = async_get_clientsession(self.hass)
-            self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
-                session, self._operator
-            )
-            
-            if not self._available_lines:
-                errors["base"] = "no_lines_found"
-            else:
-                return await self.async_step_select_lines()
+            # Move to device name step
+            return await self.async_step_device_name()
+
+        # Fetch operators
+        session = async_get_clientsession(self.hass)
+        self._operators = await EnturSXApiClient.async_get_operators(session)
+        
+        if not self._operators:
+            errors["base"] = "cannot_connect"
+            return self.async_abort(reason="cannot_connect")
 
         # Create operator options with friendly names, sorted alphabetically by name
         operator_options = [
@@ -129,11 +98,58 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         return self.async_show_form(
-            step_id="select_operator",
+            step_id="user",
             data_schema=data_schema,
             errors=errors,
-            description_placeholders={"device_name": self._device_name or ""},
         )
+
+    async def async_step_device_name(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle device name step - shown after operator selection."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            self._device_name = user_input[CONF_DEVICE_NAME]
+            
+            # Fetch lines for the selected operator
+            session = async_get_clientsession(self.hass)
+            self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
+                session, self._operator
+            )
+            
+            if not self._available_lines:
+                errors["base"] = "no_lines_found"
+            else:
+                return await self.async_step_select_lines()
+
+        # Default device name to operator name
+        default_name = self._operator_name or DEFAULT_DEVICE_NAME
+
+        # Show the form
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_DEVICE_NAME, default=default_name
+                ): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="device_name",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "operator": self._operator_name or "",
+            },
+        )
+
+    async def async_step_select_operator(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle operator selection step (deprecated - redirects to user step)."""
+        # This step is kept for backward compatibility but redirects to user step
+        return await self.async_step_user(user_input)
 
     async def async_step_select_lines(
         self, user_input: dict[str, Any] | None = None

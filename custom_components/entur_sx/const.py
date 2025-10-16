@@ -7,7 +7,7 @@ CONF_LINES_TO_CHECK = "lines_to_check"
 CONF_DEVICE_NAME = "device_name"
 
 # Defaults
-DEFAULT_DEVICE_NAME = "Entur Deviations"
+DEFAULT_DEVICE_NAME = "Entur Avvik"
 UPDATE_INTERVAL = 60  # seconds
 
 # API
