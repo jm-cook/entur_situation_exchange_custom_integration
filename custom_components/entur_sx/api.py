@@ -22,14 +22,29 @@ class EnturSXApiClient:
         operator: str | None = None,
         lines: list[str] | None = None,
     ) -> None:
-        """Initialize the API client."""
+        """Initialize the API client.
+        
+        Args:
+            operator: Full authority ID (e.g., "SKY:Authority:SKY") or operator code (e.g., "SKY")
+            lines: List of line IDs to monitor
+        """
         self._operator = operator
         self._lines = lines or []
         self._session: aiohttp.ClientSession | None = None
 
-        # Build the service URL
+        # Extract operator code for SX REST API
+        # GraphQL uses full ID (SKY:Authority:SKY), but SX REST API uses just code (SKY)
         if operator:
-            self._service_url = f"{API_BASE_URL}?datasetId={operator}"
+            if ":Authority:" in operator:
+                # Extract the code from full authority ID
+                # Format: "SKY:Authority:SKY" -> "SKY"
+                parts = operator.split(":")
+                operator_code = parts[-1] if parts else operator
+            else:
+                # Already just a code
+                operator_code = operator
+            
+            self._service_url = f"{API_BASE_URL}?datasetId={operator_code}"
         else:
             self._service_url = API_BASE_URL
 
@@ -57,7 +72,11 @@ class EnturSXApiClient:
                     self._service_url, headers=headers
                 ) as response:
                     response.raise_for_status()
-                    data = await response.json()
+                    # API returns JSON but with incorrect content-type header sometimes
+                    # Use text() and json.loads() to handle this
+                    text = await response.text()
+                    import json
+                    data = json.loads(text)
 
                     return self._parse_response(data)
 
@@ -140,29 +159,33 @@ class EnturSXApiClient:
                         # Check if this situation affects our line
                         affected_networks = networks.get("AffectedNetwork", [])
                         for an in affected_networks:
-                            affected_line = an.get("AffectedLine", [])
-                            if not affected_line:
+                            affected_lines = an.get("AffectedLine", [])
+                            if not affected_lines:
                                 continue
 
-                            line_ref_obj = affected_line[0].get("LineRef", {})
-                            line_ref = line_ref_obj.get("value")
+                            # Check ALL affected lines, not just the first one
+                            for affected_line in affected_lines:
+                                line_ref_obj = affected_line.get("LineRef", {})
+                                line_ref = line_ref_obj.get("value")
 
-                            if look_for == line_ref:
-                                # Extract summary and description
-                                summaries = element.get("Summary", [])
-                                descriptions = element.get("Description", [])
+                                if look_for == line_ref:
+                                    # Extract summary and description
+                                    summaries = element.get("Summary", [])
+                                    descriptions = element.get("Description", [])
 
-                                summary = summaries[0].get("value") if summaries else STATE_NORMAL
-                                description = descriptions[0].get("value") if descriptions else STATE_NORMAL
+                                    summary = summaries[0].get("value") if summaries else STATE_NORMAL
+                                    description = descriptions[0].get("value") if descriptions else STATE_NORMAL
 
-                                items.append({
-                                    "valid_from": start_time,
-                                    "valid_to": end_time,
-                                    "summary": summary,
-                                    "description": description,
-                                    "status": status,
-                                    "progress": progress,  # Keep original for reference
-                                })
+                                    items.append({
+                                        "valid_from": start_time,
+                                        "valid_to": end_time,
+                                        "summary": summary,
+                                        "description": description,
+                                        "status": status,
+                                        "progress": progress,  # Keep original for reference
+                                    })
+                                    # Don't break - a situation might affect the same line multiple times
+                                    # (though unlikely, we should handle it)
 
                 # Sort by timestamp (most recent first)
                 if items:

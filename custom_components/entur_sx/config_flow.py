@@ -180,3 +180,91 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         )
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
+        """Create the options flow."""
+        return EnturSXOptionsFlow(config_entry)
+
+
+class EnturSXOptionsFlow(config_entries.OptionsFlow):
+    """Handle options flow for Entur Situation Exchange."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+        self._available_lines: dict[str, str] = {}
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            # Update the config entry with new line selection
+            return self.async_create_entry(
+                title="",
+                data={
+                    CONF_LINES_TO_CHECK: user_input[CONF_LINES_TO_CHECK],
+                },
+            )
+
+        # Get current operator from config entry
+        operator = self.config_entry.data.get(CONF_OPERATOR)
+        current_lines = self.config_entry.data.get(CONF_LINES_TO_CHECK, [])
+
+        # Fetch available lines for the operator
+        session = async_get_clientsession(self.hass)
+        try:
+            self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
+                session, operator
+            )
+            
+            if not self._available_lines:
+                errors["base"] = "no_lines"
+        except Exception as err:  # pylint: disable=broad-except
+            _LOGGER.error("Error fetching lines: %s", err)
+            errors["base"] = "cannot_connect"
+
+        if errors:
+            return self.async_abort(reason=errors.get("base", "unknown"))
+
+        # Create line options with friendly names
+        line_options = [
+            selector.SelectOptionDict(
+                value=line_id,
+                label=line_name
+            )
+            for line_id, line_name in sorted(
+                self._available_lines.items(), 
+                key=lambda x: x[1]
+            )
+        ]
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_LINES_TO_CHECK,
+                    default=current_lines
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=line_options,
+                        multiple=True,
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "device_name": self.config_entry.data.get(CONF_DEVICE_NAME, ""),
+                "operator_name": self._available_lines.get(list(self._available_lines.keys())[0], "").split("(")[0] if self._available_lines else operator,
+            },
+        )

@@ -21,7 +21,7 @@
 
 ## Solutions Implemented
 
-### 1. Use Full Authority IDs Throughout
+### 1. Use Full Authority IDs Throughout (with SX API Exception)
 
 **Before:**
 ```python
@@ -32,6 +32,9 @@ operators[operator_code] = authority_name  # Stores: {"SKY": "Skyss"}
 
 # Later, construct wrong format
 authority_id = f"NSR:Authority:{operator}"  # Wrong!
+
+# SX REST API URL
+self._service_url = f"{API_BASE_URL}?datasetId={operator}"  # Used wrong format
 ```
 
 **After:**
@@ -39,9 +42,19 @@ authority_id = f"NSR:Authority:{operator}"  # Wrong!
 # Store the full authority ID as-is
 operators[authority_id] = authority_name  # Stores: {"SKY:Authority:SKY": "Skyss"}
 
-# Use it directly in queries
+# Use it directly in GraphQL queries
 # No construction needed - use the full ID
+
+# For SX REST API, extract the operator code
+if ":Authority:" in operator:
+    parts = operator.split(":")
+    operator_code = parts[-1]  # Extracts "SKY" from "SKY:Authority:SKY"
+self._service_url = f"{API_BASE_URL}?datasetId={operator_code}"  # Uses "SKY"
 ```
+
+**Key Insight**: The GraphQL API and SX REST API use different ID formats:
+- **GraphQL API**: Requires full authority ID (e.g., `SKY:Authority:SKY`)
+- **SX REST API**: Requires just the operator code (e.g., `SKY`)
 
 ### 2. Filter Non-Transit Authorities
 
@@ -93,6 +106,7 @@ query($authority: String!) {
 ## Files Modified
 
 - `custom_components/entur_sx/api.py`:
+  - `__init__()`: Extract operator code from full authority ID for SX REST API URL
   - `async_get_operators()`: Added filtering logic, store full authority IDs
   - `async_get_lines_for_operator()`: Use full authority ID, updated query structure
   - Updated fallback list with full authority IDs
@@ -100,7 +114,7 @@ query($authority: String!) {
 
 ## Testing
 
-Created comprehensive test suite (`test_final.py`) that imports and tests the actual `api.py` module:
+Created comprehensive test suite (`tests/test_final.py`) that imports and tests the actual `api.py` module:
 
 ### Test Results ✅
 - ✓ Operators list: 68 authorities (down from 69 - AMBU entry removed)
@@ -109,6 +123,7 @@ Created comprehensive test suite (`test_final.py`) that imports and tests the ac
 - ✓ SKY lines fetched successfully: **329 lines** (previously returned 0)
 - ✓ RUT (Oslo/Ruter): **403 lines** found
 - ✓ Invalid authority ID handling: Returns empty dict gracefully
+- ✓ SX REST API URL correctly extracts operator code: `datasetId=SKY` from `SKY:Authority:SKY`
 
 ### Sample Output
 ```

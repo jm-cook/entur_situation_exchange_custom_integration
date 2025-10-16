@@ -21,10 +21,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Entur Situation Exchange from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    # Create API client
+    # Create API client - merge data and options for backward compatibility
+    config_data = {**entry.data, **entry.options}
+    
     api = EnturSXApiClient(
-        operator=entry.data.get("operator"),
-        lines=entry.data.get("lines_to_check", []),
+        operator=config_data.get("operator"),
+        lines=config_data.get("lines_to_check", []),
     )
 
     # Create coordinator
@@ -41,7 +43,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Forward setup to sensor platform
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Register update listener for options flow
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
     return True
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload config entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
