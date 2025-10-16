@@ -62,7 +62,8 @@ async def async_setup_entry(
         entities.append(EnturSXSensor(coordinator, entry, line_ref, line_name))
 
     _LOGGER.info("Setting up %d Entur SX sensors", len(entities))
-    async_add_entities(entities, False)
+    # Update entities immediately with coordinator's existing data before adding
+    async_add_entities(entities, True)
 
 
 class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity):
