@@ -18,8 +18,6 @@ from .const import (
     CONF_DEVICE_NAME,
     CONF_LINES_TO_CHECK,
     CONF_OPERATOR,
-    DEFAULT_DEVICE_NAME,
-    DEFAULT_DEVICE_NAME_SUFFIX,
     DOMAIN,
 )
 
@@ -112,48 +110,59 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle device name step - shown after operator selection."""
         errors: dict[str, str] = {}
 
-        if user_input is not None:
-            self._device_name = user_input[CONF_DEVICE_NAME]
+        try:
+            if user_input is not None:
+                self._device_name = user_input[CONF_DEVICE_NAME]
+                
+                # Fetch lines for the selected operator
+                session = async_get_clientsession(self.hass)
+                _LOGGER.debug("Fetching lines for operator: %s", self._operator)
+                self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
+                    session, self._operator
+                )
+                _LOGGER.debug("Found %d lines for operator %s", len(self._available_lines), self._operator)
+                
+                if not self._available_lines:
+                    errors["base"] = "no_lines_found"
+                else:
+                    return await self.async_step_select_lines()
+
+            # Construct default device name: "<Operator> <Disruption/Avvik>"
+            # The suffix is automatically translated based on HA language
+            # e.g., "Skyss Disruption" (English) or "Skyss Avvik" (Norwegian)
+            # Note: Translation happens automatically in the UI, so we use English here
+            suffix = "Disruption"
             
-            # Fetch lines for the selected operator
-            session = async_get_clientsession(self.hass)
-            _LOGGER.debug("Fetching lines for operator: %s", self._operator)
-            self._available_lines = await EnturSXApiClient.async_get_lines_for_operator(
-                session, self._operator
-            )
-            _LOGGER.debug("Found %d lines for operator %s", len(self._available_lines), self._operator)
-            
-            if not self._available_lines:
-                errors["base"] = "no_lines_found"
+            if self._operator_name:
+                default_name = f"{self._operator_name} {suffix}"
             else:
-                return await self.async_step_select_lines()
+                default_name = f"Entur {suffix}"
 
-        # Construct default device name: "<Operator> <Disruption/Avvik>"
-        # The suffix is automatically translated based on HA language
-        # e.g., "Skyss Disruption" (English) or "Skyss Avvik" (Norwegian)
-        suffix = self.hass.localize("component.entur_sx.entity.sensor.disruption.name") or "Disruption"
-        if self._operator_name:
-            default_name = f"{self._operator_name} {suffix}"
-        else:
-            default_name = f"Entur {suffix}"
+            # Show the form
+            data_schema = vol.Schema(
+                {
+                    vol.Required(
+                        CONF_DEVICE_NAME, default=default_name
+                    ): str,
+                }
+            )
 
-        # Show the form
-        data_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_DEVICE_NAME, default=default_name
-                ): str,
-            }
-        )
-
-        return self.async_show_form(
-            step_id="device_name",
-            data_schema=data_schema,
-            errors=errors,
-            description_placeholders={
-                "operator": self._operator_name or "",
-            },
-        )
+            return self.async_show_form(
+                step_id="device_name",
+                data_schema=data_schema,
+                errors=errors,
+                description_placeholders={
+                    "operator": self._operator_name or "",
+                },
+            )
+        except Exception as err:
+            _LOGGER.error("Unexpected error in device_name step: %s", err, exc_info=True)
+            errors["base"] = "unknown"
+            return self.async_show_form(
+                step_id="device_name",
+                data_schema=vol.Schema({vol.Required(CONF_DEVICE_NAME): str}),
+                errors=errors,
+            )
 
     async def async_step_select_operator(
         self, user_input: dict[str, Any] | None = None
@@ -182,8 +191,14 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
                 
                 # Create the entry
+                # If no device name was set, use default
+                if self._device_name:
+                    title = self._device_name
+                else:
+                    title = "Entur Disruption"
+                
                 return self.async_create_entry(
-                    title=self._device_name or DEFAULT_DEVICE_NAME,
+                    title=title,
                     data={
                         CONF_DEVICE_NAME: self._device_name,
                         CONF_OPERATOR: self._operator,
