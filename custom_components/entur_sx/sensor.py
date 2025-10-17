@@ -12,7 +12,17 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_DEVICE_NAME, DOMAIN, STATE_NORMAL
+from .const import (
+    CONF_CREATE_SUMMARY_SENSORS,
+    CONF_DEVICE_NAME,
+    CONF_SUMMARY_ICON,
+    DEFAULT_SUMMARY_ICON,
+    DOMAIN,
+    STATE_NORMAL,
+    STATUS_EXPIRED,
+    STATUS_OPEN,
+    STATUS_PLANNED,
+)
 from .coordinator import EnturSXDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,6 +54,10 @@ async def async_setup_entry(
         for line_ref in lines
     }
     
+    # Add summary sensor unique ID if enabled
+    if config_data.get("create_summary_sensors", False):
+        expected_unique_ids.add(f"{entry.entry_id}_summary")
+    
     # Remove entities that are no longer configured
     for entity_entry in current_entities:
         if entity_entry.unique_id not in expected_unique_ids:
@@ -60,6 +74,10 @@ async def async_setup_entry(
         # Clean the line name for entity ID (replace : with _)
         line_name = line_ref.replace(":", "_")
         entities.append(EnturSXSensor(coordinator, entry, line_ref, line_name))
+
+    # Create summary sensor if configured
+    if config_data.get("create_summary_sensors", False):
+        entities.append(EnturSXSummarySensor(coordinator, entry, lines))
 
     _LOGGER.info("Setting up %d Entur SX sensors", len(entities))
     # Update entities immediately with coordinator's existing data before adding
@@ -151,3 +169,163 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
             attrs["deviations_by_status"] = status_counts
 
         return attrs
+
+
+class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity):
+    """Summary sensor with markdown-ready content for all monitored lines."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: EnturSXDataUpdateCoordinator,
+        entry: ConfigEntry,
+        lines: list[str],
+    ) -> None:
+        """Initialize the summary sensor."""
+        super().__init__(coordinator)
+        self.lines = lines
+        
+        device_name = entry.data.get(CONF_DEVICE_NAME, "Entur Disruption")
+        config_data = {**entry.data, **entry.options}
+        icon = config_data.get(CONF_SUMMARY_ICON, DEFAULT_SUMMARY_ICON)
+
+        # Unique ID
+        self._attr_unique_id = f"{entry.entry_id}_summary"
+
+        # Entity name
+        self._attr_name = "Summary"
+
+        # Icon
+        self._attr_icon = icon
+
+        # Device info - belongs to the same device as line sensors
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=device_name,
+            manufacturer="Entur AS",
+            entry_type=DeviceEntryType.SERVICE,
+            configuration_url="https://entur.no",
+        )
+
+    @property
+    def native_value(self) -> str:
+        """Return simple state based on active (open) disruption count."""
+        if not self.coordinator.data:
+            return STATE_NORMAL
+
+        active_count = 0
+        for line_ref in self.lines:
+            line_data = self.coordinator.data.get(line_ref, [])
+            if line_data and line_data[0].get("summary") != STATE_NORMAL:
+                status = line_data[0].get("status")
+                # Only count active (open) disruptions in state
+                if status == STATUS_OPEN:
+                    active_count += 1
+
+        if active_count == 0:
+            return STATE_NORMAL
+        elif active_count == 1:
+            return "1 active disruption"
+        else:
+            return f"{active_count} active disruptions"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return additional attributes including separate markdown for active and planned disruptions."""
+        if not self.coordinator.data:
+            return {
+                "total_lines": len(self.lines),
+                "active_disruptions": 0,
+                "planned_disruptions": 0,
+                "normal_lines": len(self.lines),
+                "markdown_active": STATE_NORMAL,
+                "markdown_planned": "No planned disruptions",
+            }
+
+        active_lines = []
+        planned_lines = []
+        normal = []
+        active_details = []
+        planned_details = []
+
+        for line_ref in self.lines:
+            line_data = self.coordinator.data.get(line_ref, [])
+            if not line_data or line_data[0].get("summary") == STATE_NORMAL:
+                normal.append(line_ref)
+            else:
+                first_item = line_data[0]
+                status = first_item.get("status")
+                
+                # Skip expired deviations
+                if status == STATUS_EXPIRED:
+                    normal.append(line_ref)
+                    continue
+                
+                # Build markdown for this disruption
+                line_markdown = f"### {line_ref}\n\n"
+                line_markdown += f"**{first_item.get('summary', 'Unknown disruption')}**\n\n"
+                
+                # Add description
+                description = first_item.get('description', '')
+                if description:
+                    line_markdown += f"{description}\n\n"
+                
+                # Add validity times
+                valid_from = first_item.get('valid_from', '')
+                valid_to = first_item.get('valid_to', '')
+                line_markdown += f"*From: {valid_from}*"
+                if valid_to:
+                    line_markdown += f" • *To: {valid_to}*\n\n"
+                else:
+                    line_markdown += " • *Until further notice*\n\n"
+                
+                # Add status/progress
+                progress = first_item.get('progress', 'unknown')
+                line_markdown += f"*Status: {status}* • *Progress: {progress}*\n\n"
+                line_markdown += "---\n\n"
+                
+                # Categorize by status
+                if status == STATUS_OPEN:
+                    active_lines.append(line_ref)
+                    active_details.append(line_markdown)
+                elif status == STATUS_PLANNED:
+                    planned_lines.append(line_ref)
+                    planned_details.append(line_markdown)
+                else:
+                    # Unknown status - include in active for safety
+                    active_lines.append(line_ref)
+                    active_details.append(line_markdown)
+
+        # Build markdown for active disruptions
+        device_name = self.device_info.get("name", "Transit") if self.device_info else "Transit"
+        
+        if not active_details:
+            markdown_active = STATE_NORMAL
+        else:
+            markdown_active = f'**<ha-alert alert-type="error"><ha-icon icon="{self._attr_icon}"></ha-icon> {device_name} - Active Disruptions</ha-alert>**\n\n'
+            markdown_active += ''.join(active_details)
+            if normal or planned_lines:
+                markdown_active += f"*{len(normal) + len(planned_lines)} line(s) with normal service*\n"
+
+        # Build markdown for planned disruptions
+        if not planned_details:
+            markdown_planned = "No planned disruptions"
+        else:
+            markdown_planned = f'**<ha-alert alert-type="info"><ha-icon icon="{self._attr_icon}"></ha-icon> {device_name} - Planned Disruptions</ha-alert>**\n\n'
+            markdown_planned += ''.join(planned_details)
+            if normal or active_lines:
+                markdown_planned += f"*{len(normal) + len(active_lines)} line(s) with normal service*\n"
+
+        return {
+            "total_lines": len(self.lines),
+            "active_disruptions": len(active_lines),
+            "planned_disruptions": len(planned_lines),
+            "normal_lines": len(normal),
+            "active_line_refs": active_lines,
+            "planned_line_refs": planned_lines,
+            "normal_line_refs": normal,
+            "markdown_active": markdown_active,
+            "markdown_planned": markdown_planned,
+        }
+

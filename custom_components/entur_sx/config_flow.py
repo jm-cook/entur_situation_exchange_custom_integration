@@ -15,10 +15,15 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import EnturSXApiClient
 from .const import (
+    CONF_CREATE_SUMMARY_SENSORS,
     CONF_DEVICE_NAME,
     CONF_LINES_TO_CHECK,
     CONF_OPERATOR,
+    CONF_SUMMARY_ICON,
+    DEFAULT_CREATE_SUMMARY_SENSORS,
+    DEFAULT_SUMMARY_ICON,
     DOMAIN,
+    SUMMARY_ICON_OPTIONS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,6 +59,8 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._selected_lines: list[str] = []
         self._operators: dict[str, str] = {}
         self._available_lines: dict[str, str] = {}
+        self._create_summary_sensors: bool = DEFAULT_CREATE_SUMMARY_SENSORS
+        self._summary_icon: str = DEFAULT_SUMMARY_ICON
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -184,27 +191,8 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_LINES_TO_CHECK] = "no_lines"
             else:
                 self._selected_lines = selected_lines
-                
-                # Check if this combination already exists
-                unique_id = f"{self._operator}_{'-'.join(sorted(self._selected_lines))}"
-                await self.async_set_unique_id(unique_id)
-                self._abort_if_unique_id_configured()
-                
-                # Create the entry
-                # If no device name was set, use default
-                if self._device_name:
-                    title = self._device_name
-                else:
-                    title = "Entur Disruption"
-                
-                return self.async_create_entry(
-                    title=title,
-                    data={
-                        CONF_DEVICE_NAME: self._device_name,
-                        CONF_OPERATOR: self._operator,
-                        CONF_LINES_TO_CHECK: self._selected_lines,
-                    },
-                )
+                # Move to summary sensor configuration step
+                return await self.async_step_summary_sensors()
 
         # Create line options with friendly names, sorted numerically by line number
         line_options = [
@@ -237,6 +225,74 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={
                 "device_name": self._device_name or "",
                 "operator": f"{self._operator} - {self._operators.get(self._operator, '')}"
+            },
+        )
+
+    async def async_step_summary_sensors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle summary sensor configuration step."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            self._create_summary_sensors = user_input.get(
+                CONF_CREATE_SUMMARY_SENSORS, DEFAULT_CREATE_SUMMARY_SENSORS
+            )
+            self._summary_icon = user_input.get(CONF_SUMMARY_ICON, DEFAULT_SUMMARY_ICON)
+            
+            # Check if this combination already exists
+            unique_id = f"{self._operator}_{'-'.join(sorted(self._selected_lines))}"
+            await self.async_set_unique_id(unique_id)
+            self._abort_if_unique_id_configured()
+            
+            # Create the entry
+            if self._device_name:
+                title = self._device_name
+            else:
+                title = "Entur Disruption"
+            
+            return self.async_create_entry(
+                title=title,
+                data={
+                    CONF_DEVICE_NAME: self._device_name,
+                    CONF_OPERATOR: self._operator,
+                    CONF_LINES_TO_CHECK: self._selected_lines,
+                    CONF_CREATE_SUMMARY_SENSORS: self._create_summary_sensors,
+                    CONF_SUMMARY_ICON: self._summary_icon,
+                },
+            )
+
+        # Create icon selector options
+        icon_options = [
+            selector.SelectOptionDict(value=icon, label=icon.replace("mdi:", "").replace("-", " ").title())
+            for icon in SUMMARY_ICON_OPTIONS
+        ]
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_CREATE_SUMMARY_SENSORS, 
+                    default=DEFAULT_CREATE_SUMMARY_SENSORS
+                ): selector.BooleanSelector(),
+                vol.Required(
+                    CONF_SUMMARY_ICON,
+                    default=DEFAULT_SUMMARY_ICON
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=icon_options,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="summary_sensors",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "device_name": self._device_name or "Entur Disruption",
+                "line_count": str(len(self._selected_lines)),
             },
         )
 

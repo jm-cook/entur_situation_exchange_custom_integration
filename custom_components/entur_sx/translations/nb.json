@@ -30,6 +30,18 @@
         "data_description": {
           "lines_to_check": "Velg én eller flere linjer å følge"
         }
+      },
+      "summary_sensors": {
+        "title": "Sammendragssensor",
+        "description": "Opprett en sammendragssensor for {device_name} med {line_count} linjer",
+        "data": {
+          "create_summary_sensors": "Opprett markdown-sammendragssensor",
+          "summary_icon": "Ikon for sammendragssensor"
+        },
+        "data_description": {
+          "create_summary_sensors": "Opprett automatisk en tekstsensor med markdown-formatert innhold som viser alle avvik, klar til å vises i et markdown-kort",
+          "summary_icon": "Velg et ikon som representerer din transporttype"
+        }
       }
     },
     "error": {

@@ -5,10 +5,26 @@ DOMAIN = "entur_sx"
 CONF_OPERATOR = "operator"
 CONF_LINES_TO_CHECK = "lines_to_check"
 CONF_DEVICE_NAME = "device_name"
+CONF_CREATE_SUMMARY_SENSORS = "create_summary_sensors"
+CONF_SUMMARY_ICON = "summary_icon"
 
 # Defaults
 DEFAULT_DEVICE_NAME = "Entur Disruption"  # Fallback only, translations preferred
+DEFAULT_CREATE_SUMMARY_SENSORS = True
+DEFAULT_SUMMARY_ICON = "mdi:bus-alert"
 UPDATE_INTERVAL = 60  # seconds
+
+# Icon options for summary sensors
+SUMMARY_ICON_OPTIONS = [
+    "mdi:bus-alert",
+    "mdi:bus",
+    "mdi:tram",
+    "mdi:train",
+    "mdi:ferry",
+    "mdi:subway-variant",
+    "mdi:alert-circle",
+    "mdi:transit-connection-variant",
+]
 
 # API
 API_BASE_URL = "https://api.entur.io/realtime/v1/rest/sx"

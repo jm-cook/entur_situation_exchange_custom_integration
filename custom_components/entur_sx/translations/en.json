@@ -30,6 +30,18 @@
         "data_description": {
           "lines_to_check": "Select one or more lines to track"
         }
+      },
+      "summary_sensors": {
+        "title": "Summary Sensor",
+        "description": "Create a summary sensor for {device_name} with {line_count} lines",
+        "data": {
+          "create_summary_sensors": "Create markdown summary sensor",
+          "summary_icon": "Icon for summary sensor"
+        },
+        "data_description": {
+          "create_summary_sensors": "Automatically create a text sensor with markdown-formatted content showing all disruptions, ready to display in a markdown card",
+          "summary_icon": "Choose an icon that represents your transit type"
+        }
       }
     },
     "error": {

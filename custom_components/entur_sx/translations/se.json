@@ -30,6 +30,18 @@
         "data_description": {
           "lines_to_check": "Vállje okta dahje eanet linnjáid čuovvolit"
         }
+      },
+      "summary_sensors": {
+        "title": "Čoakkáldat sensora",
+        "description": "Ráhkat čoakkáldat sensora {device_name} várás {line_count} linnjáiguin",
+        "data": {
+          "create_summary_sensors": "Ráhkat markdown-čoakkáldat sensora",
+          "summary_icon": "Govva čoakkáldat sensorii"
+        },
+        "data_description": {
+          "create_summary_sensors": "Automáhtalaččat ráhkat teavstta sensora markdown-formáhttojuvvon sisdoaluin mii čájeha buot heiveheamiid, gárves čájehuvvot markdown-kártas",
+          "summary_icon": "Vállje govva mii ovdanbuktá du johtalantyypa"
+        }
       }
     },
     "error": {
