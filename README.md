@@ -1,165 +1,260 @@
-Navigate to: [My smart home](../..)
+# Entur Situation Exchange Custom Integration
 
-# Home Assistant EnTur situation exchange query app for appdaemon
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/jm-cook/entur_situation_exchange_custom_integration)
 
-This folder contains instructions and code for accessing the EnTur situation exchange data. EnTur is the Norwegian
-national travel planner and provides various APIs for travel planning, ticketing, vehicle tracking and 
-information on deviations in services.
+A Home Assistant custom integration for monitoring public transport service deviations from Entur (Norwegian national travel planner).
 
-The code in this folder accesses the situation-exchange and creates Home Assistant sensors monitoring the state of specified lines.
+This integration creates sensors for each monitored transit line, showing the current service status and any active deviations. It integrates directly with Home Assistant without requiring AppDaemon or MQTT.
 
-This standalone python app for appdaemon will create sensors for each of the lines that you select. 
-To use it you will use the Home Assistant addons appdaemon and mqtt and install the python app
-for appdaemon. This method may initially seem 
-complicated but installation *should* be straightforward and the solution gives the best results out of all the methods that I tried.
+## What is Entur Situation Exchange?
 
-## Why?
-
-Why did I make this when the operator already provides this information in their app and on the web? I made this 
-because I live near to the public stop that I use most often and wanted a more immediate information channel. Most of the time all is well, but sometimes
-due to weather or some other outside influence, the whole line may stop and chaos ensues. It is great to 
-know before I go out of the house that all systems are functioning normally, and if not then take some
-avoiding action. I have the relevant sensors, like the ones described here, on my dashboard in the kitchen. They only show if there is
-a problem (by using conditional visibility), but better to be able to see what is going on there than to open up the web or an app. 
-I have also set up alerting in the HA companion app, something that 
-the local operator's app does not do.
+Entur provides real-time information about service disruptions, delays, and deviations for public transport across Norway. This integration monitors specific transit lines and alerts you when there are issues affecting your regular routes.
 
 ## Installation
 
-To install the codes you must follow these steps:
+### Installation with HACS (Recommended)
 
-1. install the mosquitto broker add on for home assistant. To do this go to the add-ons configuration section and select the mosquitto broker from the list of official addons.
+1. Open HACS in your Home Assistant instance
+2. Click on "Integrations"
+3. Click the three dots in the top right corner
+4. Select "Custom repositories"
+5. Add the URL: `https://github.com/jm-cook/entur_situation_exchange_custom_integration`
+6. Select category: "Integration"
+7. Click "Add"
+8. Search for "Entur Situation Exchange" in HACS
+9. Click "Download"
+10. Restart Home Assistant
 
-   [![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_store.svg)](https://my.home-assistant.io/redirect/supervisor_store/)
+### Manual Installation
 
-   Install mosquitto and configure it.
+1. Copy the `custom_components/entur_sx` folder to your Home Assistant `custom_components` directory
+2. Restart Home Assistant
 
-1. You will need the MQTT integration from the integrations page:
-   
-   [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=mqtt)
+## Configuration
 
-1. Now install the appdaemon addon which is available form the addon store.
+After installation, add the integration through the Home Assistant UI:
 
-   [![Open your Home Assistant instance and show the add-on store.](https://my.home-assistant.io/badges/supervisor_store.svg)](https://my.home-assistant.io/redirect/supervisor_store/)
+1. Go to **Settings** → **Devices & Services**
+2. Click **+ Add Integration**
+3. Search for "Entur Situation Exchange"
+4. Follow the configuration wizard:
 
------------------------------
-The script "entur_sx.py" is an app for appdaemon that fetches the entur SX data and creates appropriate sensors on your system through Home Assistant  autodiscovery of MQTT.
-Copy the script to your appdaemon app folder. It will probably be in something like: ```/addon_configs/a0d7b954_appdaemon/apps```, you will need 
-to upload the file yourself, or copy/paste using an editor
+### Step 1: Device Name
+   - **Device name**: A descriptive name for this collection of lines (e.g., "My Daily Commute")
 
-Then configure the app in the ```apps.yml``` file located in the same folder as the python script. Similar to the following:
+### Step 2: Select Operator
+   - Choose from a list of all Norwegian public transport operators
+   - Shows both the operator code (e.g., SKY) and friendly name (e.g., Skyss)
+   - Common operators:
+     - **SKY** - Skyss (Bergen area)
+     - **RUT** - Ruter (Oslo area)
+     - **ATB** - AtB (Trondheim area)
+     - **KOL** - Kolumbus (Stavanger area)
+     - And many more...
 
+### Step 3: Select Lines
+   - Choose one or more lines to monitor
+   - Shows line numbers with route names and transport mode
+   - Example: "1 - Bergen sentrum (bus)"
+
+The integration will create one sensor for each selected line.
+
+### Finding Line References
+
+You no longer need to manually look up line references! The config flow automatically:
+- Fetches all available operators from Entur
+- Shows operator codes and friendly names
+- Fetches all lines for your selected operator
+- Displays line numbers, names, and transport modes
+
+You can add multiple monitoring devices for different operators or groups of lines by repeating the process.
+
+## Use
+
+The integration creates one sensor for each monitored line. Each sensor shows:
+
+- **State**: The current status summary (e.g., "Normal service" or description of the deviation)
+- **Attributes**:
+  - `status`: Current status - `open` (active now), `planned` (scheduled), or `expired` (ended)
+  - `valid_from`: When the deviation started/starts (ISO timestamp)
+  - `valid_to`: When the deviation ends (ISO timestamp, may be null)
+  - `description`: Detailed description of the deviation
+  - `progress`: Raw progress value from API (OPEN, CLOSED, etc.)
+  - `line_ref`: The line reference
+  - `all_deviations`: Array of all deviations if multiple exist
+  - `total_deviations`: Count of all deviations
+  - `deviations_by_status`: Count of deviations grouped by status
+
+## Features
+
+- 🚌 Monitor multiple transit lines
+- 🔄 Automatic updates every 60 seconds
+- 🌐 Support for all Norwegian operators
+- 📊 Detailed deviation information in attributes
+- ⏰ **Status indicators** - planned, open, or expired deviations
+- 🕐 **Start and end times** - know exactly when deviations apply
+- 🎯 Clean entity IDs based on line references
+- 💡 Native Home Assistant integration (no AppDaemon or MQTT required)
+- ✨ **Dynamic operator and line discovery** - no need to look up codes manually!
+- 🎨 **User-friendly config flow** - select operators and lines from dropdown lists
+- 🔍 **Lowercase-safe progress detection** - handles API changes gracefully
+
+## Example Dashboard Configuration
+
+### Basic Status Card
 ```yaml
----
-entursx:
-  module: entur_sx
-  class: EnturSX
-  log_level: INFO
-  device: Skyss Avvik
-  operator: SKY
-  include_future: false
-  lines_to_check:
-    - SKY:Line:1
-    - SKY:Line:2
-    - SKY:Line:20
-    - SKY:Line:990
+type: entities
+title: Transit Status
+entities:
+  - entity: sensor.entur_sx_sky_line_1
+  - entity: sensor.entur_sx_sky_line_2
+  - entity: sensor.entur_sx_sky_line_20
 ```
 
-The things that you can change are: operator, lines_to_check, device, and include_future
-
-You might also change the log_level to DEBUG if needed.
-
-Once the ```app.yaml``` and the python app are in place, the app should run automatically, so check the logs for appdaemon.
-
-The app will create the required sensors on your system (through MQTT discovery). You should find them
-under the MQTT integration page similar to this:
-
-![image](https://github.com/user-attachments/assets/356eb486-38de-40bd-ab11-5d9eb3e1dea0)
-
-The sensors will have a default icon when they are created, but the app creates a ```unique_id``` for each sensor so you can edit the sensor and and change the icon to a mdi icon of your own choice.
-
-![image](https://github.com/user-attachments/assets/0efaaf32-0b02-4702-9eec-f04c40e073d3)
-
-Note that the app script specifies that MQTT topics should be retained. This is to ensure continuity between restarts
-of HA (otherwise the sensors become unavailable). MQTT retention can be tricky, and if something goes wrong, or you want to remove a line/sensor, then 
-it will most likely be retained. This may mean that old line sensors are still available after you have 
-removed them from the configuration. There is currently no automatic purge to remove previous configurations (but see below).
-
-Once you have your deviation sensors working, you can display them in your dashboard. A simple example:
-
-![image](https://github.com/user-attachments/assets/27f9ddef-6c2a-4432-bdb1-5c0c280de0b7)
-
-In this example, the description is conditionally shown, epending on whether there is an on-going deviation or not.
-
-YAML code for a sections view:
+### Conditional Card (only show when deviations exist)
 ```yaml
-views:
-  - type: sections
-    max_columns: 4
-    title: SKYSS
-    path: skyss
-    sections:
-      - type: grid
-        cards:
-          - type: heading
-            heading: Utvalgte SKYSS avvik
-            heading_style: title
-          - type: tile
-            grid_options:
-              columns: full
-            entity: sensor.skyss_avvik_sky_line_20
-            name: Bus 20
-            icon: ''
-          - type: markdown
-            content: '{{ state_attr( ''sensor.skyss_avvik_sky_line_20'', ''description'') }}'
-            visibility:
-              - condition: state
-                entity: sensor.skyss_avvik_sky_line_20
-                state_not: Normal service
-          - type: tile
-            grid_options:
-              columns: full
-            entity: sensor.skyss_avvik_sky_line_1
-            name: Bybanen
-            icon: ''
-          - type: markdown
-            content: '{{ state_attr( ''sensor.skyss_avvik_sky_line_1'', ''description'') }}'
-            visibility:
-              - condition: state
-                entity: sensor.skyss_avvik_sky_line_1
-                state_not: Normal service
+type: conditional
+conditions:
+  - condition: state
+    entity: sensor.entur_sx_sky_line_1
+    state_not: Normal service
+card:
+  type: markdown
+  content: >
+    ## ⚠️ {{ states('sensor.entur_sx_sky_line_1') }}
+    
+    **Line:** {{ state_attr('sensor.entur_sx_sky_line_1', 'line_ref') }}
+    
+    **Status:** {{ state_attr('sensor.entur_sx_sky_line_1', 'status') }}
+    
+    **Valid from:** {{ state_attr('sensor.entur_sx_sky_line_1', 'valid_from') }}
+    
+    {% if state_attr('sensor.entur_sx_sky_line_1', 'valid_to') %}
+    **Valid to:** {{ state_attr('sensor.entur_sx_sky_line_1', 'valid_to') }}
+    {% endif %}
+    
+    **Description:**
+    {{ state_attr('sensor.entur_sx_sky_line_1', 'description') }}
 ```
 
-In addition you might like to send a notification to the companion app on your phone. An example 
-automation to do this is shown below (you will need to define "COMPANION_APPS" yourself, check the documentation for notifications):
-
+### Show Only Active (Open) Deviations
 ```yaml
-alias: Bybanen avvik
-description: ""
-triggers:
-  - trigger: state
-    entity_id:
-      - sensor.skyss_avvik_sky_line_1
-    attribute: description
-conditions: []
-actions:
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-  - action: notify.COMPANION_APPS
-    metadata: {}
-    data:
-      message: "Bybanen: {{ states('sensor.skyss_avvik_sky_line_1') }}"
-      data:
-        sticky: "true"
-        clickAction: /nest-mush-panel/skyss
-mode: single
+type: conditional
+conditions:
+  - condition: template
+    value_template: "{{ state_attr('sensor.entur_sx_sky_line_1', 'status') == 'open' }}"
+card:
+  type: markdown
+  content: >
+    ## 🚨 Active Deviation on Line 1
+    {{ states('sensor.entur_sx_sky_line_1') }}
 ```
---------------------------------------------------------
-If you should use a configuration that created a line sensor that you no longer need, the sensor will continue to exist even if you remove it from the ```lines_to_check``` configuration. This is due to
-message retention in the mosquitto broker. The current method to remove unwanted line sensors is to access the mosquitto broker using MQTT Explorer (take a look here https://community.home-assistant.io/t/addon-mqtt-explorer-new-version/603739). If you connect MQTT Explorer to your broker, you can delete the unwanted topics there:
 
-![image](https://github.com/user-attachments/assets/b0f9e176-149b-41f1-9038-f2b5f30b3bec)
+### Multiple Lines with Icons
+```yaml
+type: glance
+title: My Transit Lines
+entities:
+  - entity: sensor.entur_sx_sky_line_1
+    name: Line 1
+  - entity: sensor.entur_sx_sky_line_2
+    name: Line 2
+  - entity: sensor.entur_sx_sky_line_20
+    name: Line 20
+show_state: true
+```
 
+## Automations
 
+### Alert on Deviation
+```yaml
+automation:
+  - alias: "Transit Deviation Alert"
+    trigger:
+      - platform: state
+        entity_id: sensor.entur_sx_sky_line_1
+        attribute: status
+        to: "open"
+    condition:
+      - condition: template
+        value_template: "{{ trigger.to_state.state != 'Normal service' }}"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Transit Deviation - Line 1"
+          message: >
+            {{ states('sensor.entur_sx_sky_line_1') }}
+            
+            Valid from: {{ state_attr('sensor.entur_sx_sky_line_1', 'valid_from') }}
+```
+
+### Alert on Planned Deviation (Get Advance Warning)
+```yaml
+automation:
+  - alias: "Planned Transit Deviation Alert"
+    trigger:
+      - platform: state
+        entity_id: sensor.entur_sx_sky_line_1
+        attribute: status
+        to: "planned"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Upcoming Transit Deviation - Line 1"
+          message: >
+            Scheduled: {{ states('sensor.entur_sx_sky_line_1') }}
+            
+            Starts: {{ state_attr('sensor.entur_sx_sky_line_1', 'valid_from') }}
+```
+
+## Migration from AppDaemon
+
+If you're migrating from the AppDaemon version:
+
+1. Install this custom integration
+2. Configure it with the same lines you had in `apps.yaml`
+3. Update your dashboard cards to use the new entity IDs (format: `sensor.entur_sx_{operator}_line_{number}`)
+4. Update automations to use the new `status` attribute instead of checking state
+5. The MQTT sensors will become unavailable - you can safely remove them
+6. Uninstall the AppDaemon app
+
+Key differences:
+- **No MQTT broker required**
+- **No AppDaemon required**
+- Entity IDs follow HA naming conventions: `sensor.entur_sx_sky_line_1` instead of `sensor.sky_line_1`
+- Attributes are directly on the sensor (no separate attribute topic)
+- UI-based configuration (no need to edit YAML files)
+- **No `include_future` setting** - all deviations are collected with `status` indicator
+- **New attributes**: `status` (planned/open/expired), `valid_to`, `progress`
+- **Lowercase-safe progress detection** - handles API changes
+
+## Troubleshooting
+
+### "Integration not found"
+- Ensure folder is named exactly `entur_sx`
+- Check it's in `custom_components/entur_sx/`
+- Restart Home Assistant
+
+### Sensors show "Unavailable"
+- Wait 60 seconds for first update
+- Check Home Assistant logs for errors
+- Verify line references are correct
+- Test the API URL manually: https://api.entur.io/realtime/v1/rest/sx
+
+### Wrong operator data
+- Specify the operator filter in configuration
+- Use the correct operator code (SKY, RUT, ATB, etc.)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Credits
+
+- Original AppDaemon version by Jeremy Cook
+- Converted to native Home Assistant custom integration
+- Data provided by [Entur AS](https://entur.no)
