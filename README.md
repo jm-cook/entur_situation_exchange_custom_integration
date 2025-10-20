@@ -10,6 +10,14 @@ This integration creates sensors for each monitored transit line, showing the cu
 
 Entur provides real-time information about service disruptions, delays, and deviations for public transport across Norway. This integration monitors specific transit lines and alerts you when there are issues affecting your regular routes.
 
+Example status message:
+
+<img width="1254" height="331" alt="image" src="https://github.com/user-attachments/assets/4c9749f8-eb2a-47ac-bccf-698e5c74eddf" />
+
+With this integration you can create sensors for just the routes you are interested in monitoring. This is useful if you use the same routes regularly and want a quick
+update before you leave your home, or you can get a notification on your mobile device.
+
+
 ## Installation
 
 ### Installation with HACS (Recommended)
