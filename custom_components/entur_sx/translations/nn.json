@@ -19,8 +19,7 @@
         },
         "data_description": {
           "device_name": "Eit venleg namn for eininga (brukar operatørnamn som standard)"
-        },
-        "device_suffix": "Avvik"
+        }
       },
       "select_lines": {
         "title": "Vel linjer å overvake",
@@ -76,13 +75,6 @@
     "sensor": {
       "disruption": {
         "name": "Avvik"
-      }
-    }
-  },
-  "selector": {
-    "device_suffix": {
-      "options": {
-        "disruption": "Avvik"
       }
     }
   }

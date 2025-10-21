@@ -19,8 +19,7 @@
         },
         "data_description": {
           "device_name": "A friendly name for this device (defaults to operator name)"
-        },
-        "device_suffix": "Disruption"
+        }
       },
       "select_lines": {
         "title": "Select Lines to Monitor",
@@ -58,13 +57,6 @@
     "error": {
       "no_lines": "You must select at least one line",
       "cannot_connect": "Failed to connect to Entur API"
-    }
-  },
-  "selector": {
-    "device_suffix": {
-      "options": {
-        "disruption": "Disruption"
-      }
     }
   }
 }

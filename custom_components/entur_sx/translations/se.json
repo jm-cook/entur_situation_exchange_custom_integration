@@ -19,8 +19,7 @@
         },
         "data_description": {
           "device_name": "Soahpaš namma ovttadahkii (geavaha vuojuheaddji nama standárdan)"
-        },
-        "device_suffix": "Heiveheapmi"
+        }
       },
       "select_lines": {
         "title": "Vállje linnjáid bearráigeahččat",
@@ -76,13 +75,6 @@
     "sensor": {
       "disruption": {
         "name": "Heiveheapmi"
-      }
-    }
-  },
-  "selector": {
-    "device_suffix": {
-      "options": {
-        "disruption": "Heiveheapmi"
       }
     }
   }

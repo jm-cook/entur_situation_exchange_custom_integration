@@ -19,8 +19,7 @@
         },
         "data_description": {
           "device_name": "Et vennlig navn for enheten (bruker operatørnavn som standard)"
-        },
-        "device_suffix": "Avvik"
+        }
       },
       "select_lines": {
         "title": "Velg linjer å overvåke",
@@ -76,13 +75,6 @@
     "sensor": {
       "disruption": {
         "name": "Avvik"
-      }
-    }
-  },
-  "selector": {
-    "device_suffix": {
-      "options": {
-        "disruption": "Avvik"
       }
     }
   }
