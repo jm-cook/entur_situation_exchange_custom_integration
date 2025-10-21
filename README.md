@@ -66,7 +66,7 @@ After installation, add the integration through the Home Assistant UI:
 ### Step 3: Select Lines
    - Choose one or more lines to monitor
    - Shows line numbers with route names and transport mode
-   - Example: "1 - Bergen sentrum (bus)"
+   - Example: "1 - Bergen lufthavn Flesland- Lagunen - Byparken (tram)"
 
 The integration will create one sensor for each selected line.
 
