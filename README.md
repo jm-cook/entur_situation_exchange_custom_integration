@@ -1,6 +1,9 @@
 # Entur Situation Exchange Custom Integration
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/jm-cook/entur_situation_exchange_custom_integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/jm-cook/ha-entur_sx)
+[![Validate with HACS](https://github.com/jm-cook/ha-entur_sx/actions/workflows/validate.yaml/badge.svg)](https://github.com/jm-cook/ha-entur_sx/actions/workflows/validate.yaml)
+[![GitHub Release](https://img.shields.io/github/release/jm-cook/ha-entur_sx.svg)](https://github.com/jm-cook/ha-entur_sx/releases)
+![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
 
 A Home Assistant custom integration for monitoring public transport service deviations from Entur (Norwegian national travel planner).
 
@@ -26,7 +29,7 @@ update before you leave your home, or you can get a notification on your mobile 
 2. Click on "Integrations"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
-5. Add the URL: `https://github.com/jm-cook/entur_situation_exchange_custom_integration`
+5. Add the URL: `https://github.com/jm-cook/ha-entur_sx`
 6. Select category: "Integration"
 7. Click "Add"
 8. Search for "Entur Situation Exchange" in HACS

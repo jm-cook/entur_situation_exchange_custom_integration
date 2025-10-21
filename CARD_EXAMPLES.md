@@ -715,7 +715,7 @@ automation:
 ## Need Help?
 
 - Check the [main README](README.md) for integration setup
-- Report issues on [GitHub](https://github.com/jm-cook/entur_situation_exchange_custom_integration/issues)
+- Report issues on [GitHub](https://github.com/jm-cook/ha-entur_sx/issues)
 - The entity attributes available:
   - `line_ref` - The line reference (e.g., "SKY:Line:1")
   - `valid_from` - When the disruption starts
