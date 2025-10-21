@@ -135,15 +135,16 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return await self.async_step_select_lines()
 
             # Get translated suffix for device name
-            # This will use "Disruption" for English or "Avvik" for Norwegian
+            # Note: Config flows use the system language setting from Settings → System → General
+            # The user's UI language preference doesn't affect config flow defaults
             translations = await translation.async_get_translations(
                 self.hass,
                 self.hass.config.language,
-                "selector",
+                "config",
                 {DOMAIN},
             )
             
-            translation_key = f"component.{DOMAIN}.selector.device_suffix.options.disruption"
+            translation_key = f"component.{DOMAIN}.config.step.device_name.device_suffix"
             suffix = translations.get(translation_key, "Disruption")  # Fallback to English
             
             if self._operator_name:

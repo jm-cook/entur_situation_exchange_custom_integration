@@ -19,7 +19,8 @@
         },
         "data_description": {
           "device_name": "A friendly name for this device (defaults to operator name)"
-        }
+        },
+        "device_suffix": "Disruption"
       },
       "select_lines": {
         "title": "Select Lines to Monitor",
