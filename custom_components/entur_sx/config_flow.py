@@ -10,7 +10,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import selector
+from homeassistant.helpers import selector, translation
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import EnturSXApiClient
@@ -134,11 +134,17 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     return await self.async_step_select_lines()
 
-            # Construct default device name: "<Operator> <Disruption/Avvik>"
-            # The suffix is automatically translated based on HA language
-            # e.g., "Skyss Disruption" (English) or "Skyss Avvik" (Norwegian)
-            # Note: Translation happens automatically in the UI, so we use English here
-            suffix = "Disruption"
+            # Get translated suffix for device name
+            # This will use "Disruption" for English or "Avvik" for Norwegian
+            translations = await translation.async_get_translations(
+                self.hass,
+                self.hass.config.language,
+                "selector",
+                {DOMAIN},
+            )
+            
+            translation_key = f"component.{DOMAIN}.selector.device_suffix.options.disruption"
+            suffix = translations.get(translation_key, "Disruption")  # Fallback to English
             
             if self._operator_name:
                 # Strip the codespace/namespace from operator name (e.g., "Skyss (SKY)" -> "Skyss")
