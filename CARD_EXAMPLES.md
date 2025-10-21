@@ -40,16 +40,16 @@ The summary sensor provides **two separate markdown attributes**:
 - `markdown_active` - Active (open) disruptions with red alert banner
 - `markdown_planned` - Planned disruptions with blue info banner
 
-**Important:** Replace `sensor.skyss_disruption_summary` with your actual entity ID (e.g., `sensor.skyss_sky_disruption_summary`)
+**Important:** Replace `sensor.skyss_disruption_summary` with your actual entity ID (e.g., `sensor.skyss_disruption_summary`)
 
 #### Option 1: Show Active Disruptions Only (Recommended)
 
 ```yaml
 type: markdown
-content: "{{ state_attr('sensor.skyss_sky_disruption_summary', 'markdown_active') }}"
+content: "{{ state_attr('sensor.skyss_disruption_summary', 'markdown_active') }}"
 visibility:
   - condition: state
-    entity: sensor.skyss_sky_disruption_summary
+    entity: sensor.skyss_disruption_summary
     state_not: Normal service
 ```
 
@@ -58,7 +58,7 @@ visibility:
 **Option 2a: Without visibility (always shows)**
 ```yaml
 type: markdown
-content: "{{ state_attr('sensor.skyss_sky_disruption_summary', 'markdown_planned') }}"
+content: "{{ state_attr('sensor.skyss_disruption_summary', 'markdown_planned') }}"
 ```
 
 **Option 2b: With visibility using helper sensor (recommended)**
@@ -70,13 +70,13 @@ Go to **Settings → Devices & Services → Helpers → Create Helper → Templa
 - **Name**: Skyss Has Planned Disruptions
 - **State template**:
   ```jinja
-  {{ state_attr('sensor.skyss_sky_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
+  {{ state_attr('sensor.skyss_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
   ```
 
 Then use it in your card:
 ```yaml
 type: markdown
-content: "{{ state_attr('sensor.skyss_sky_disruption_summary', 'markdown_planned') }}"
+content: "{{ state_attr('sensor.skyss_disruption_summary', 'markdown_planned') }}"
 visibility:
   - condition: state
     entity: binary_sensor.skyss_has_planned_disruptions
@@ -92,15 +92,15 @@ type: vertical-stack
 cards:
   # Active disruptions card
   - type: markdown
-    content: "{{ state_attr('sensor.skyss_sky_disruption_summary', 'markdown_active') }}"
+    content: "{{ state_attr('sensor.skyss_disruption_summary', 'markdown_active') }}"
     visibility:
       - condition: state
-        entity: sensor.skyss_sky_disruption_summary
+        entity: sensor.skyss_disruption_summary
         state_not: Normal service
   
   # Planned disruptions card
   - type: markdown
-    content: "{{ state_attr('sensor.skyss_sky_disruption_summary', 'markdown_planned') }}"
+    content: "{{ state_attr('sensor.skyss_disruption_summary', 'markdown_planned') }}"
     visibility:
       - condition: state
         entity: binary_sensor.skyss_has_planned_disruptions
@@ -113,8 +113,8 @@ cards:
 > - Template conditions are NOT supported in card visibility - only state conditions work
 > - **Find your entity ID**: Go to Developer Tools → States and search for "summary"
 > - The entity ID format is usually: `sensor.{device_name}_summary`
->   - Example: `sensor.skyss_sky_disruption_summary` for device "Skyss SKY Disruption"
->   - Example: `sensor.ruter_avvik_summary` for device "Ruter Avvik"
+>   - Example: `sensor.skyss_disruption_summary` for device "Skyss Disruption"
+>   - Example: `sensor.ruter_disruption_summary` for device "Ruter Disruption"
 
 ### What It Looks Like
 
@@ -203,7 +203,7 @@ Use these in visibility conditions:
 # Example: Show card only if there are active disruptions (simplest - recommended!)
 visibility:
   - condition: state
-    entity: sensor.skyss_sky_disruption_summary
+    entity: sensor.skyss_disruption_summary
     state_not: Normal service
 
 # Example: Show card only if there are planned disruptions (requires helper sensor)
@@ -217,7 +217,7 @@ visibility:
   - condition: or
     conditions:
       - condition: state
-        entity: sensor.skyss_sky_disruption_summary
+        entity: sensor.skyss_disruption_summary
         state_not: Normal service
       - condition: state
         entity: binary_sensor.skyss_has_planned_disruptions
@@ -243,10 +243,10 @@ content: >-
   **<ha-alert alert-type="warning"><ha-icon icon="mdi:tram-side"></ha-icon>
   Bybanen</ha-alert>**
 
-  {{ state_attr('sensor.skyss_avvik_sky_line_1', 'description') }}
+  {{ state_attr('sensor.skyss_disruption_sky_line_1', 'description') }}
 visibility:
   - condition: state
-    entity: sensor.skyss_avvik_sky_line_1
+    entity: sensor.skyss_disruption_sky_line_1
     state_not: Normal service
 ```
 
@@ -278,9 +278,9 @@ Shows disruptions for multiple lines in a single card.
 type: markdown
 content: >-
   {% set lines = [
-    'sensor.skyss_avvik_sky_line_1',
-    'sensor.skyss_avvik_sky_line_2',
-    'sensor.skyss_avvik_sky_line_3'
+    'sensor.skyss_disruption_sky_line_1',
+    'sensor.skyss_disruption_sky_line_2',
+    'sensor.skyss_disruption_sky_line_3'
   ] %}
 
   **<ha-alert alert-type="warning"><ha-icon icon="mdi:bus-alert"></ha-icon>
@@ -308,13 +308,13 @@ visibility:
   - condition: or
     conditions:
       - condition: state
-        entity: sensor.skyss_avvik_sky_line_1
+        entity: sensor.skyss_disruption_sky_line_1
         state_not: Normal service
       - condition: state
-        entity: sensor.skyss_avvik_sky_line_2
+        entity: sensor.skyss_disruption_sky_line_2
         state_not: Normal service
       - condition: state
-        entity: sensor.skyss_avvik_sky_line_3
+        entity: sensor.skyss_disruption_sky_line_3
         state_not: Normal service
 ```
 
@@ -336,13 +336,13 @@ type: entities
 title: Transit Disruptions
 icon: mdi:bus-alert
 entities:
-  - entity: sensor.skyss_avvik_sky_line_1
+  - entity: sensor.skyss_disruption_sky_line_1
     name: Line 1
     secondary_info: last-changed
-  - entity: sensor.skyss_avvik_sky_line_2
+  - entity: sensor.skyss_disruption_sky_line_2
     name: Line 2
     secondary_info: last-changed
-  - entity: sensor.skyss_avvik_sky_line_3
+  - entity: sensor.skyss_disruption_sky_line_3
     name: Line 3
     secondary_info: last-changed
 state_color: true
@@ -368,28 +368,28 @@ conditions:
   - condition: or
     conditions:
       - condition: state
-        entity: sensor.skyss_avvik_sky_line_1
+        entity: sensor.skyss_disruption_sky_line_1
         state_not: Normal service
       - condition: state
-        entity: sensor.skyss_avvik_sky_line_2
+        entity: sensor.skyss_disruption_sky_line_2
         state_not: Normal service
 card:
   type: markdown
   content: >-
     ## ⚠️ Transit Disruptions
 
-    {% if not is_state('sensor.skyss_avvik_sky_line_1', 'Normal service') %}
-    **Line 1:** {{ states('sensor.skyss_avvik_sky_line_1') }}
+  {% if not is_state('sensor.skyss_disruption_sky_line_1', 'Normal service') %}
+  **Line 1:** {{ states('sensor.skyss_disruption_sky_line_1') }}
     
-    {{ state_attr('sensor.skyss_avvik_sky_line_1', 'description') }}
+  {{ state_attr('sensor.skyss_disruption_sky_line_1', 'description') }}
     
     ---
     {% endif %}
 
-    {% if not is_state('sensor.skyss_avvik_sky_line_2', 'Normal service') %}
-    **Line 2:** {{ states('sensor.skyss_avvik_sky_line_2') }}
+  {% if not is_state('sensor.skyss_disruption_sky_line_2', 'Normal service') %}
+  **Line 2:** {{ states('sensor.skyss_disruption_sky_line_2') }}
     
-    {{ state_attr('sensor.skyss_avvik_sky_line_2', 'description') }}
+  {{ state_attr('sensor.skyss_disruption_sky_line_2', 'description') }}
     {% endif %}
 ```
 
@@ -413,7 +413,7 @@ You can create these manually via **Settings → Devices & Services → Helpers 
 
 **State Template:**
 ```jinja
-{{ state_attr('sensor.skyss_sky_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
+{{ state_attr('sensor.skyss_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
 ```
 
 **Device Class:** `problem`
@@ -436,9 +436,9 @@ visibility:
 
 **State Template:**
 ```jinja
-{{ not is_state('sensor.skyss_avvik_sky_line_1', 'Normal service') 
-   or not is_state('sensor.skyss_avvik_sky_line_2', 'Normal service') 
-   or not is_state('sensor.skyss_avvik_sky_line_3', 'Normal service') }}
+{{ not is_state('sensor.skyss_disruption_sky_line_1', 'Normal service') 
+  or not is_state('sensor.skyss_disruption_sky_line_2', 'Normal service') 
+  or not is_state('sensor.skyss_disruption_sky_line_3', 'Normal service') }}
 ```
 
 **Device Class:** `problem`
@@ -454,9 +454,9 @@ This creates a binary sensor that's "on" when any line has a disruption.
 **State Template:**
 ```jinja
 {{ [
-  states('sensor.skyss_avvik_sky_line_1'),
-  states('sensor.skyss_avvik_sky_line_2'),
-  states('sensor.skyss_avvik_sky_line_3')
+  states('sensor.skyss_disruption_sky_line_1'),
+  states('sensor.skyss_disruption_sky_line_2'),
+  states('sensor.skyss_disruption_sky_line_3')
 ] | reject('eq', 'Normal service') | list | count }}
 ```
 
@@ -472,11 +472,11 @@ This creates a sensor showing the number of lines with active disruptions.
 
 **State Template:**
 ```jinja
-{% set lines = [
-  'sensor.skyss_avvik_sky_line_1',
-  'sensor.skyss_avvik_sky_line_2',
-  'sensor.skyss_avvik_sky_line_3'
-] %}
+  {% set lines = [
+    'sensor.skyss_disruption_sky_line_1',
+    'sensor.skyss_disruption_sky_line_2',
+    'sensor.skyss_disruption_sky_line_3'
+  ] %}
 {% set disrupted = lines | reject('is_state', 'Normal service') | list %}
 {% if disrupted | length == 0 %}
   Normal service
@@ -489,13 +489,13 @@ This creates a sensor showing the number of lines with active disruptions.
 
 **Attributes Template:**
 ```jinja
-{% set lines = {
-  'sensor.skyss_avvik_sky_line_1': 'Line 1',
-  'sensor.skyss_avvik_sky_line_2': 'Line 2',
-  'sensor.skyss_avvik_sky_line_3': 'Line 3'
+  {% set lines = {
+  'sensor.skyss_disruption_sky_line_1': 'Line 1',
+  'sensor.skyss_disruption_sky_line_2': 'Line 2',
+  'sensor.skyss_disruption_sky_line_3': 'Line 3'
 } %}
-{% set disrupted = {} %}
-{% for entity, name in lines.items() %}
+  {% set disrupted = {} %}
+  {% for entity, name in lines.items() %}
   {% if not is_state(entity, 'Normal service') %}
     {% set disrupted = dict(disrupted, **{name: states(entity)}) %}
   {% endif %}
@@ -515,7 +515,7 @@ template:
         unique_id: skyss_has_planned_disruptions
         device_class: problem
         state: >
-          {{ state_attr('sensor.skyss_sky_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
+          {{ state_attr('sensor.skyss_disruption_summary', 'planned_disruptions') | int(0) > 0 }}
         icon: >
           {% if this.state == 'on' %}
             mdi:calendar-alert
@@ -529,9 +529,9 @@ template:
         unique_id: skyss_has_disruptions
         device_class: problem
         state: >
-          {{ not is_state('sensor.skyss_avvik_sky_line_1', 'Normal service') 
-             or not is_state('sensor.skyss_avvik_sky_line_2', 'Normal service') 
-             or not is_state('sensor.skyss_avvik_sky_line_3', 'Normal service') }}
+       {{ not is_state('sensor.skyss_disruption_sky_line_1', 'Normal service') 
+         or not is_state('sensor.skyss_disruption_sky_line_2', 'Normal service') 
+         or not is_state('sensor.skyss_disruption_sky_line_3', 'Normal service') }}
         icon: >
           {% if this.state == 'on' %}
             mdi:bus-alert
@@ -545,9 +545,9 @@ template:
         unit_of_measurement: "disruptions"
         state: >
           {{ [
-            states('sensor.skyss_avvik_sky_line_1'),
-            states('sensor.skyss_avvik_sky_line_2'),
-            states('sensor.skyss_avvik_sky_line_3')
+            states('sensor.skyss_disruption_sky_line_1'),
+            states('sensor.skyss_disruption_sky_line_2'),
+            states('sensor.skyss_disruption_sky_line_3')
           ] | reject('eq', 'Normal service') | list | count }}
         icon: mdi:counter
 ```
@@ -612,7 +612,7 @@ cards:
 Use these conditions to color-code by status attribute:
 
 ```yaml
-{% set status = state_attr('sensor.skyss_avvik_sky_line_1', 'status') %}
+{% set status = state_attr('sensor.skyss_disruption_sky_line_1', 'status') %}
 {% if status == 'open' %}
   <ha-alert alert-type="error">  <!-- Red for active disruptions -->
 {% elif status == 'planned' %}
@@ -629,8 +629,8 @@ Use these conditions to color-code by status attribute:
 Format the validity times nicely:
 
 ```jinja
-Valid from: {{ state_attr('sensor.skyss_avvik_sky_line_1', 'valid_from') | as_timestamp | timestamp_custom('%d.%m.%Y %H:%M') }}
-Valid to: {{ state_attr('sensor.skyss_avvik_sky_line_1', 'valid_to') | as_timestamp | timestamp_custom('%d.%m.%Y %H:%M') if state_attr('sensor.skyss_avvik_sky_line_1', 'valid_to') else 'Until further notice' }}
+Valid from: {{ state_attr('sensor.skyss_disruption_sky_line_1', 'valid_from') | as_timestamp | timestamp_custom('%d.%m.%Y %H:%M') }}
+Valid to: {{ state_attr('sensor.skyss_disruption_sky_line_1', 'valid_to') | as_timestamp | timestamp_custom('%d.%m.%Y %H:%M') if state_attr('sensor.skyss_disruption_sky_line_1', 'valid_to') else 'Until further notice' }}
 ```
 
 ### Mobile-Friendly Cards
@@ -640,8 +640,8 @@ For mobile dashboards, use more compact formatting:
 ```yaml
 type: markdown
 content: >-
-  {% if not is_state('sensor.skyss_avvik_sky_line_1', 'Normal service') %}
-  🚌 **Line 1**: {{ states('sensor.skyss_avvik_sky_line_1') }}
+  {% if not is_state('sensor.skyss_disruption_sky_line_1', 'Normal service') %}
+  🚌 **Line 1**: {{ states('sensor.skyss_disruption_sky_line_1') }}
   {% endif %}
 ```
 
@@ -655,7 +655,7 @@ automation:
   - alias: "Notify on Active Transit Disruption"
     trigger:
       - platform: state
-        entity_id: sensor.skyss_disruption_summary
+  entity_id: sensor.skyss_disruption_summary
         attribute: active_disruptions
     condition:
       - condition: template
@@ -674,7 +674,7 @@ automation:
   - alias: "Notify on Planned Transit Disruption"
     trigger:
       - platform: state
-        entity_id: sensor.skyss_disruption_summary
+  entity_id: sensor.skyss_disruption_summary
         attribute: planned_disruptions
     condition:
       - condition: template
@@ -693,7 +693,7 @@ automation:
   - alias: "Notify on Individual Line Disruption"
     trigger:
       - platform: state
-        entity_id: sensor.skyss_avvik_sky_line_1
+  entity_id: sensor.skyss_disruption_sky_line_1
         to: ~
     condition:
       - condition: template
@@ -726,3 +726,4 @@ automation:
   - `all_deviations` - List of all active disruptions for the line (if multiple)
   - `total_deviations` - Count of active disruptions
   - `deviations_by_status` - Count grouped by status
+

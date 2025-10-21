@@ -38,6 +38,10 @@ This PR adds brand assets for the Entur Situation Exchange (entur_sx) custom int
 **Type**: Custom Integration
 
 **Files included:**
+- icon.png (256x256px, X KB)
+- dark_icon.png (256x256px, X KB)
+- logo.png (256x128px, X KB) [if included]
+- dark_logo.png (256x128px, X KB) [if included]
 
 **Design attribution:**
 Based on Entur AS official app icon design. Entur branding used with respect to their brand guidelines.

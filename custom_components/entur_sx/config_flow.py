@@ -141,7 +141,9 @@ class EnturSXConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             suffix = "Disruption"
             
             if self._operator_name:
-                default_name = f"{self._operator_name} {suffix}"
+                # Strip the codespace/namespace from operator name (e.g., "Skyss (SKY)" -> "Skyss")
+                operator_display = self._operator_name.split(" (")[0] if " (" in self._operator_name else self._operator_name
+                default_name = f"{operator_display} {suffix}"
             else:
                 default_name = f"Entur {suffix}"
 
