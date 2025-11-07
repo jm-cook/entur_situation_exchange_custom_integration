@@ -134,20 +134,30 @@ class EnturSXApiClient:
                         # Determine status based on time and Progress field
                         start_timestamp = datetime.fromisoformat(start_time).timestamp()
                         
-                        # If Progress is closed, mark as expired (resolved but still returned by API)
-                        if progress_lower == "closed":
-                            status = STATUS_EXPIRED
-                        elif now_timestamp < start_timestamp:
+                        # Determine status primarily based on time validity
+                        if now_timestamp < start_timestamp:
+                            # Future event - always planned regardless of progress
                             status = STATUS_PLANNED
                         elif end_time:
                             end_timestamp = datetime.fromisoformat(end_time).timestamp()
                             if now_timestamp > end_timestamp:
+                                # Past the end time - expired
                                 status = STATUS_EXPIRED
                             else:
-                                status = STATUS_OPEN
+                                # Currently active
+                                # Check Progress field - if closed, it's been resolved
+                                if progress_lower == "closed":
+                                    status = STATUS_EXPIRED
+                                else:
+                                    status = STATUS_OPEN
                         else:
-                            # No end time specified, consider it open if started
-                            status = STATUS_OPEN
+                            # No end time specified
+                            # Check Progress field - if closed, treat as expired
+                            if progress_lower == "closed":
+                                status = STATUS_EXPIRED
+                            else:
+                                # No end time and not closed - consider it open if started
+                                status = STATUS_OPEN
 
                         # Check if this situation affects our line
                         affected_networks = networks.get("AffectedNetwork", [])
@@ -180,9 +190,11 @@ class EnturSXApiClient:
                                     # Don't break - a situation might affect the same line multiple times
                                     # (though unlikely, we should handle it)
 
-                # Sort by timestamp (most recent first)
+                # Sort by relevance: OPEN first, then PLANNED, then EXPIRED
+                # Within each status group, sort by start time (most recent first)
                 if items:
-                    items.sort(reverse=True, key=lambda x: x["valid_from"])
+                    status_priority = {STATUS_OPEN: 0, STATUS_PLANNED: 1, STATUS_EXPIRED: 2}
+                    items.sort(key=lambda x: (status_priority.get(x["status"], 3), -datetime.fromisoformat(x["valid_from"]).timestamp()))
                 else:
                     # No situation for this line, set default
                     items.append({

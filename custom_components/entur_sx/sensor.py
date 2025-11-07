@@ -131,8 +131,37 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         if not line_data:
             return None
 
-        # Return the summary of the first (most recent) item
-        return line_data[0].get("summary")
+        # Get the first (most relevant) item
+        first_item = line_data[0]
+        first_status = first_item.get("status")
+
+        # If there's only one disruption, return its summary
+        if len(line_data) == 1:
+            return first_item.get("summary")
+
+        # Count how many disruptions have the same status as the first one
+        same_status_count = sum(1 for item in line_data if item.get("status") == first_status)
+
+        # If there are multiple disruptions with the same status, combine them
+        if same_status_count > 1:
+            # Get all summaries for disruptions with the same status
+            summaries = [
+                item.get("summary", "Unknown disruption")
+                for item in line_data
+                if item.get("status") == first_status
+            ]
+
+            # Join with separator for readability
+            combined = " | ".join(summaries)
+
+            # If the combined summary is too long, use a count instead
+            if len(combined) > 255:
+                return f"{same_status_count} {first_status} disruptions: {summaries[0]}"
+
+            return combined
+
+        # Different statuses - return the first one's summary
+        return first_item.get("summary")
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
