@@ -272,8 +272,8 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
                 "markdown_planned": "No planned disruptions",
             }
 
-        active_lines = []
-        planned_lines = []
+        active_lines = set()
+        planned_lines = set()
         normal = []
         active_details = []
         planned_details = []
@@ -282,27 +282,33 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
             line_data = self.coordinator.data.get(line_ref, [])
             if not line_data or line_data[0].get("summary") == STATE_NORMAL:
                 normal.append(line_ref)
-            else:
-                first_item = line_data[0]
-                status = first_item.get("status")
+                continue
+            
+            # Track if this line has any non-expired deviations
+            has_active = False
+            has_planned = False
+            
+            # Process all deviations for this line
+            for deviation in line_data:
+                status = deviation.get("status")
                 
                 # Skip expired deviations
                 if status == STATUS_EXPIRED:
-                    normal.append(line_ref)
                     continue
                 
                 # Build markdown for this disruption
                 line_markdown = f"### {line_ref}\n\n"
-                line_markdown += f"**{first_item.get('summary', 'Unknown disruption')}**\n\n"
+                summary = deviation.get('summary', 'Unknown disruption')
+                line_markdown += f"**{summary}**\n\n"
                 
                 # Add description
-                description = first_item.get('description', '')
+                description = deviation.get('description', '')
                 if description:
                     line_markdown += f"{description}\n\n"
                 
                 # Add validity times
-                valid_from = first_item.get('valid_from', '')
-                valid_to = first_item.get('valid_to', '')
+                valid_from = deviation.get('valid_from', '')
+                valid_to = deviation.get('valid_to', '')
                 line_markdown += f"*From: {valid_from}*"
                 if valid_to:
                     line_markdown += f" • *To: {valid_to}*\n\n"
@@ -310,49 +316,76 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
                     line_markdown += " • *Until further notice*\n\n"
                 
                 # Add status/progress
-                progress = first_item.get('progress', 'unknown')
-                line_markdown += f"*Status: {status}* • *Progress: {progress}*\n\n"
+                progress = deviation.get('progress', 'unknown')
+                line_markdown += (
+                    f"*Status: {status}* • *Progress: {progress}*\n\n"
+                )
                 line_markdown += "---\n\n"
                 
                 # Categorize by status
                 if status == STATUS_OPEN:
-                    active_lines.append(line_ref)
+                    has_active = True
+                    active_lines.add(line_ref)
                     active_details.append(line_markdown)
                 elif status == STATUS_PLANNED:
-                    planned_lines.append(line_ref)
+                    has_planned = True
+                    planned_lines.add(line_ref)
                     planned_details.append(line_markdown)
                 else:
                     # Unknown status - include in active for safety
-                    active_lines.append(line_ref)
+                    has_active = True
+                    active_lines.add(line_ref)
                     active_details.append(line_markdown)
+            
+            # If line has no non-expired deviations, mark as normal
+            if not has_active and not has_planned:
+                normal.append(line_ref)
 
         # Build markdown for active disruptions
-        device_name = self.device_info.get("name", "Transit") if self.device_info else "Transit"
+        device_name = (
+            self.device_info.get("name", "Transit")
+            if self.device_info
+            else "Transit"
+        )
         
         if not active_details:
             markdown_active = STATE_NORMAL
         else:
-            markdown_active = f'**<ha-alert alert-type="error"><ha-icon icon="{self._attr_icon}"></ha-icon> {device_name} - Active Disruptions</ha-alert>**\n\n'
+            markdown_active = (
+                f'**<ha-alert alert-type="error">'
+                f'<ha-icon icon="{self._attr_icon}"></ha-icon> '
+                f'{device_name} - Active Disruptions</ha-alert>**\n\n'
+            )
             markdown_active += ''.join(active_details)
             if normal or planned_lines:
-                markdown_active += f"*{len(normal) + len(planned_lines)} line(s) with normal service*\n"
+                normal_count = len(normal) + len(planned_lines)
+                markdown_active += (
+                    f"*{normal_count} line(s) with normal service*\n"
+                )
 
         # Build markdown for planned disruptions
         if not planned_details:
             markdown_planned = "No planned disruptions"
         else:
-            markdown_planned = f'**<ha-alert alert-type="info"><ha-icon icon="{self._attr_icon}"></ha-icon> {device_name} - Planned Disruptions</ha-alert>**\n\n'
+            markdown_planned = (
+                f'**<ha-alert alert-type="info">'
+                f'<ha-icon icon="{self._attr_icon}"></ha-icon> '
+                f'{device_name} - Planned Disruptions</ha-alert>**\n\n'
+            )
             markdown_planned += ''.join(planned_details)
             if normal or active_lines:
-                markdown_planned += f"*{len(normal) + len(active_lines)} line(s) with normal service*\n"
+                normal_count = len(normal) + len(active_lines)
+                markdown_planned += (
+                    f"*{normal_count} line(s) with normal service*\n"
+                )
 
         return {
             "total_lines": len(self.lines),
             "active_disruptions": len(active_lines),
             "planned_disruptions": len(planned_lines),
             "normal_lines": len(normal),
-            "active_line_refs": active_lines,
-            "planned_line_refs": planned_lines,
+            "active_line_refs": list(active_lines),
+            "planned_line_refs": list(planned_lines),
             "normal_line_refs": normal,
             "markdown_active": markdown_active,
             "markdown_planned": markdown_planned,
