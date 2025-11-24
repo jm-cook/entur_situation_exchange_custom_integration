@@ -1,6 +1,7 @@
 """Sensor platform for Entur Situation Exchange."""
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 from typing import Any
 
@@ -131,37 +132,65 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         if not line_data:
             return None
 
-        # Get the first (most relevant) item
-        first_item = line_data[0]
-        first_status = first_item.get("status")
+        # Filter to only active (open) disruptions that are within their time window
+        now_timestamp = datetime.now().timestamp()
+        active_disruptions = []
+        
+        for item in line_data:
+            status = item.get("status")
+            
+            # Only consider open status disruptions
+            if status != STATUS_OPEN:
+                continue
+            
+            # Verify the disruption is within its time window
+            valid_from = item.get("valid_from")
+            valid_to = item.get("valid_to")
+            
+            if not valid_from:
+                continue
+            
+            try:
+                start_timestamp = datetime.fromisoformat(valid_from).timestamp()
+                
+                # Check if disruption has started
+                if now_timestamp < start_timestamp:
+                    continue
+                
+                # Check if disruption has ended (if end time is specified)
+                if valid_to:
+                    end_timestamp = datetime.fromisoformat(valid_to).timestamp()
+                    if now_timestamp > end_timestamp:
+                        continue
+                
+                # This disruption is currently active
+                active_disruptions.append(item)
+            except (ValueError, AttributeError):
+                # Skip items with invalid timestamps
+                continue
+        
+        # If no active disruptions, return normal state
+        if not active_disruptions:
+            return STATE_NORMAL
 
-        # If there's only one disruption, return its summary
-        if len(line_data) == 1:
-            return first_item.get("summary")
+        # If there's only one active disruption, return its summary
+        if len(active_disruptions) == 1:
+            return active_disruptions[0].get("summary")
 
-        # Count how many disruptions have the same status as the first one
-        same_status_count = sum(1 for item in line_data if item.get("status") == first_status)
+        # Multiple active disruptions - combine their summaries
+        summaries = [
+            item.get("summary", "Unknown disruption")
+            for item in active_disruptions
+        ]
 
-        # If there are multiple disruptions with the same status, combine them
-        if same_status_count > 1:
-            # Get all summaries for disruptions with the same status
-            summaries = [
-                item.get("summary", "Unknown disruption")
-                for item in line_data
-                if item.get("status") == first_status
-            ]
+        # Join with separator for readability
+        combined = " | ".join(summaries)
 
-            # Join with separator for readability
-            combined = " | ".join(summaries)
+        # If the combined summary is too long, use a count instead
+        if len(combined) > 255:
+            return f"{len(active_disruptions)} active disruptions: {summaries[0]}"
 
-            # If the combined summary is too long, use a count instead
-            if len(combined) > 255:
-                return f"{same_status_count} {first_status} disruptions: {summaries[0]}"
-
-            return combined
-
-        # Different statuses - return the first one's summary
-        return first_item.get("summary")
+        return combined
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
