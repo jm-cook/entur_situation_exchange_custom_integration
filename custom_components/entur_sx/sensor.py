@@ -1,4 +1,5 @@
 """Sensor platform for Entur Situation Exchange."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +15,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    CONF_CREATE_SUMMARY_SENSORS,
     CONF_DEVICE_NAME,
     CONF_SUMMARY_ICON,
     DEFAULT_SUMMARY_ICON,
@@ -35,35 +35,38 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Entur SX sensors from a config entry."""
-    coordinator: EnturSXDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: EnturSXDataUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]
 
-    # Get the list of lines to monitor - merge data and options (options takes precedence)
+    # Get the list of lines to monitor - merge data and options
+    # (options takes precedence)
     config_data = {**entry.data, **entry.options}
     lines = config_data.get("lines_to_check", [])
 
     # Clean up entities for lines that are no longer configured
     entity_registry = er.async_get(hass)
-    
+
     # Get all entities for this config entry
     current_entities = er.async_entries_for_config_entry(
         entity_registry, entry.entry_id
     )
-    
+
     # Build set of expected unique IDs
     expected_unique_ids = {
-        f"{entry.entry_id}_{line_ref.replace(':', '_')}" 
-        for line_ref in lines
+        f"{entry.entry_id}_{line_ref.replace(':', '_')}" for line_ref in lines
     }
-    
+
     # Add summary sensor unique ID if enabled
     if config_data.get("create_summary_sensors", False):
         expected_unique_ids.add(f"{entry.entry_id}_summary")
-    
+
     # Remove entities that are no longer configured
     for entity_entry in current_entities:
         if entity_entry.unique_id not in expected_unique_ids:
             _LOGGER.info(
-                "Removing entity %s (unique_id: %s) - line no longer configured",
+                "Removing entity %s (unique_id: %s) - line no longer "
+                "configured",
                 entity_entry.entity_id,
                 entity_entry.unique_id,
             )
@@ -81,11 +84,14 @@ async def async_setup_entry(
         entities.append(EnturSXSummarySensor(coordinator, entry, lines))
 
     _LOGGER.info("Setting up %d Entur SX sensors", len(entities))
-    # Update entities immediately with coordinator's existing data before adding
+    # Update entities immediately with coordinator's existing data
+    # before adding
     async_add_entities(entities, True)
 
 
-class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity):
+class EnturSXSensor(
+    CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity
+):
     """Sensor for a single Entur transit line deviation status."""
 
     _attr_has_entity_name = True
@@ -124,7 +130,10 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
 
     @property
     def native_value(self) -> str | None:
-        """Return the state of the sensor (the summary of the most recent deviation)."""
+        """Return the state of the sensor.
+        
+        Returns the summary of the most recent deviation.
+        """
         if not self.coordinator.data:
             return None
 
@@ -132,43 +141,48 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         if not line_data:
             return None
 
-        # Filter to only active (open) disruptions that are within their time window
+        # Filter to only active (open) disruptions that are within
+        # their time window
         now_timestamp = datetime.now().timestamp()
         active_disruptions = []
-        
+
         for item in line_data:
             status = item.get("status")
-            
+
             # Only consider open status disruptions
             if status != STATUS_OPEN:
                 continue
-            
+
             # Verify the disruption is within its time window
             valid_from = item.get("valid_from")
             valid_to = item.get("valid_to")
-            
+
             if not valid_from:
                 continue
-            
+
             try:
-                start_timestamp = datetime.fromisoformat(valid_from).timestamp()
-                
+                start_timestamp = datetime.fromisoformat(
+                    valid_from
+                ).timestamp()
+
                 # Check if disruption has started
                 if now_timestamp < start_timestamp:
                     continue
-                
+
                 # Check if disruption has ended (if end time is specified)
                 if valid_to:
-                    end_timestamp = datetime.fromisoformat(valid_to).timestamp()
+                    end_timestamp = datetime.fromisoformat(
+                        valid_to
+                    ).timestamp()
                     if now_timestamp > end_timestamp:
                         continue
-                
+
                 # This disruption is currently active
                 active_disruptions.append(item)
             except (ValueError, AttributeError):
                 # Skip items with invalid timestamps
                 continue
-        
+
         # If no active disruptions, return normal state
         if not active_disruptions:
             return STATE_NORMAL
@@ -188,7 +202,10 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
 
         # If the combined summary is too long, use a count instead
         if len(combined) > 255:
-            return f"{len(active_disruptions)} active disruptions: {summaries[0]}"
+            return (
+                f"{len(active_disruptions)} active disruptions: "
+                f"{summaries[0]}"
+            )
 
         return combined
 
@@ -218,7 +235,7 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         if len(line_data) > 1:
             attrs["all_deviations"] = line_data
             attrs["total_deviations"] = len(line_data)
-            
+
             # Count by status
             status_counts = {}
             for item in line_data:
@@ -229,7 +246,9 @@ class EnturSXSensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntit
         return attrs
 
 
-class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity):
+class EnturSXSummarySensor(
+    CoordinatorEntity[EnturSXDataUpdateCoordinator], SensorEntity
+):
     """Summary sensor with markdown-ready content for all monitored lines."""
 
     _attr_has_entity_name = True
@@ -243,7 +262,7 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
         """Initialize the summary sensor."""
         super().__init__(coordinator)
         self.lines = lines
-        
+
         device_name = entry.data.get(CONF_DEVICE_NAME, "Entur Disruption")
         config_data = {**entry.data, **entry.options}
         icon = config_data.get(CONF_SUMMARY_ICON, DEFAULT_SUMMARY_ICON)
@@ -290,7 +309,10 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Return additional attributes including separate markdown for active and planned disruptions."""
+        """Return additional attributes.
+        
+        Includes separate markdown for active and planned disruptions.
+        """
         if not self.coordinator.data:
             return {
                 "total_lines": len(self.lines),
@@ -312,45 +334,45 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
             if not line_data or line_data[0].get("summary") == STATE_NORMAL:
                 normal.append(line_ref)
                 continue
-            
+
             # Track if this line has any non-expired deviations
             has_active = False
             has_planned = False
-            
+
             # Process all deviations for this line
             for deviation in line_data:
                 status = deviation.get("status")
-                
+
                 # Skip expired deviations
                 if status == STATUS_EXPIRED:
                     continue
-                
+
                 # Build markdown for this disruption
                 line_markdown = f"### {line_ref}\n\n"
-                summary = deviation.get('summary', 'Unknown disruption')
+                summary = deviation.get("summary", "Unknown disruption")
                 line_markdown += f"**{summary}**\n\n"
-                
+
                 # Add description
-                description = deviation.get('description', '')
+                description = deviation.get("description", "")
                 if description:
                     line_markdown += f"{description}\n\n"
-                
+
                 # Add validity times
-                valid_from = deviation.get('valid_from', '')
-                valid_to = deviation.get('valid_to', '')
+                valid_from = deviation.get("valid_from", "")
+                valid_to = deviation.get("valid_to", "")
                 line_markdown += f"*From: {valid_from}*"
                 if valid_to:
                     line_markdown += f" • *To: {valid_to}*\n\n"
                 else:
                     line_markdown += " • *Until further notice*\n\n"
-                
+
                 # Add status/progress
                 progress = deviation.get('progress', 'unknown')
                 line_markdown += (
                     f"*Status: {status}* • *Progress: {progress}*\n\n"
                 )
                 line_markdown += "---\n\n"
-                
+
                 # Categorize by status
                 if status == STATUS_OPEN:
                     has_active = True
@@ -365,7 +387,7 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
                     has_active = True
                     active_lines.add(line_ref)
                     active_details.append(line_markdown)
-            
+
             # If line has no non-expired deviations, mark as normal
             if not has_active and not has_planned:
                 normal.append(line_ref)
@@ -376,14 +398,14 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
             if self.device_info
             else "Transit"
         )
-        
+
         if not active_details:
             markdown_active = STATE_NORMAL
         else:
             markdown_active = (
                 f'**<ha-alert alert-type="error">'
                 f'<ha-icon icon="{self._attr_icon}"></ha-icon> '
-                f'{device_name} - Active Disruptions</ha-alert>**\n\n'
+                f"{device_name} - Active Disruptions</ha-alert>**\n\n"
             )
             markdown_active += ''.join(active_details)
             if normal or planned_lines:
@@ -399,7 +421,7 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
             markdown_planned = (
                 f'**<ha-alert alert-type="info">'
                 f'<ha-icon icon="{self._attr_icon}"></ha-icon> '
-                f'{device_name} - Planned Disruptions</ha-alert>**\n\n'
+                f"{device_name} - Planned Disruptions</ha-alert>**\n\n"
             )
             markdown_planned += ''.join(planned_details)
             if normal or active_lines:
@@ -419,4 +441,3 @@ class EnturSXSummarySensor(CoordinatorEntity[EnturSXDataUpdateCoordinator], Sens
             "markdown_active": markdown_active,
             "markdown_planned": markdown_planned,
         }
-
