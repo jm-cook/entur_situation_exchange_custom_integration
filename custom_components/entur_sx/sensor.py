@@ -189,7 +189,11 @@ class EnturSXSensor(
 
         # If there's only one active disruption, return its summary
         if len(active_disruptions) == 1:
-            return active_disruptions[0].get("summary")
+            summary = active_disruptions[0].get("summary", "Disruption")
+            # Truncate if too long
+            if len(summary) > 255:
+                return summary[:252] + "..."
+            return summary
 
         # Multiple active disruptions - combine their summaries
         summaries = [
@@ -200,12 +204,13 @@ class EnturSXSensor(
         # Join with separator for readability
         combined = " | ".join(summaries)
 
-        # If the combined summary is too long, use a count instead
+        # If the combined summary is too long, truncate appropriately
         if len(combined) > 255:
-            return (
-                f"{len(active_disruptions)} active disruptions: "
-                f"{summaries[0]}"
-            )
+            # Use count format with truncated first summary
+            count_prefix = f"{len(active_disruptions)} active disruptions: "
+            max_summary_len = 255 - len(count_prefix) - 3  # -3 for "..."
+            first_summary = summaries[0][:max_summary_len] + "..."
+            return count_prefix + first_summary
 
         return combined
 
@@ -225,6 +230,7 @@ class EnturSXSensor(
         attrs = {
             "valid_from": current.get("valid_from"),
             "valid_to": current.get("valid_to"),
+            "summary": current.get("summary"),
             "description": current.get("description"),
             "status": current.get("status"),
             "progress": current.get("progress"),
