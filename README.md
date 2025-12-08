@@ -109,6 +109,67 @@ The integration creates one sensor for each monitored line. Each sensor shows:
 - ✨ **Dynamic operator and line discovery** - no need to look up codes manually!
 - 🎨 **User-friendly config flow** - select operators and lines from dropdown lists
 - 🔍 **Lowercase-safe progress detection** - handles API changes gracefully
+- 📝 **Disruption tracking log** - optional detailed logging of when disruptions appear and disappear
+
+## Disruption Tracking Log
+
+The integration can maintain a detailed log of when disruptions appear and disappear from the Entur API. This is useful for:
+- Tracking patterns in what disruptions are published to the API
+- Comparing with operator websites to identify missing disruptions
+- Monitoring the reliability of the data feed
+
+### Enabling Disruption Logging
+
+Add this to your `configuration.yaml`:
+
+```yaml
+logger:
+  default: info
+  logs:
+    # Regular integration logs (optional - for debugging)
+    custom_components.entur_sx: debug
+    
+    # Disruption tracking log (recommended)
+    custom_components.entur_sx.coordinator.disruptions: info
+```
+
+Restart Home Assistant after making changes.
+
+### Log Output
+
+The disruption log will show entries like:
+
+```
+2025-12-06 20:15:00 INFO (MainThread) [custom_components.entur_sx.coordinator.disruptions] [2025-12-06 20:15:00] NEW disruption on SKY:Line:1 (status: open) - Det er forseinkingar på linja etter driftsst... - valid from: 2025-12-06T18:30:00+01:00
+
+2025-12-06 21:45:00 INFO (MainThread) [custom_components.entur_sx.coordinator.disruptions] [2025-12-06 21:45:00] REMOVED disruption from SKY:Line:1 (was: open) - Det er forseinkingar på linja etter driftsst...
+```
+
+### Viewing the Log
+
+**Option 1: Via Home Assistant UI**
+1. Go to **Settings** → **System** → **Logs**
+2. Filter by `custom_components.entur_sx.coordinator.disruptions`
+
+**Option 2: In home-assistant.log file**
+1. Open `/config/home-assistant.log`
+2. Search for `custom_components.entur_sx.coordinator.disruptions`
+
+**Option 3: Create a persistent log file** (recommended for long-term tracking)
+
+Add to `configuration.yaml`:
+
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.entur_sx.coordinator.disruptions: info
+  filters:
+    custom_components.entur_sx.coordinator.disruptions:
+      - "/config/entur_sx_disruptions.log"
+```
+
+Note: The filters option requires Home Assistant 2023.4 or later. For older versions, the disruptions will only appear in the main `home-assistant.log` file.
 
 ## Example Dashboard Configuration
 
@@ -238,6 +299,27 @@ Key differences:
 - **New attributes**: `status` (planned/open/expired), `valid_to`, `progress`
 - **Lowercase-safe progress detection** - handles API changes
 
+## Known Limitations
+
+### Not All Disruptions May Be Available
+
+This integration uses Entur's SIRI-SX (Situation Exchange) API, which is the official public API for service disruptions in Norway. However, some transport operators may publish certain disruptions only to their own websites and not to the Entur API.
+
+**Examples of potentially missing disruptions:**
+- Real-time operational delays (short-term delays from incidents)
+- Light rail/tram disruptions in some regions
+- Very recent disruptions that haven't been published to the API yet
+
+**What you can do:**
+- If you notice systematic gaps (e.g., disruptions consistently appearing on the operator's website but not in Home Assistant), please report this to both the operator and to Entur
+- For critical routes, consider also monitoring the operator's official website or app as a backup
+- The integration shows all data that is published to Entur's public API - any missing disruptions are due to the operator not publishing them to this feed
+
+**Confirmed cases:**
+- Skyss (Bergen area): Some Bybane (light rail) disruptions and short-term delays may only appear on [skyss.no/avvik](https://www.skyss.no/avvik/)
+
+This is not a bug in the integration - it correctly retrieves all available data from the official API.
+
 ## Troubleshooting
 
 ### "Integration not found"
@@ -254,6 +336,11 @@ Key differences:
 ### Wrong operator data
 - Specify the operator filter in configuration
 - Use the correct operator code (SKY, RUT, ATB, etc.)
+
+### Missing disruptions that appear on operator's website
+- See "Known Limitations" section above
+- This is due to operators not publishing all disruptions to Entur's public API
+- Contact the operator to request they publish all disruptions to the SIRI-SX feed
 
 ## Contributing
 

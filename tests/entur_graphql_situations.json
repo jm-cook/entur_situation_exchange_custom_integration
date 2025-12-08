@@ -1,0 +1,1931 @@
+{
+  "data": {
+    "situations": [
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyMTUy",
+        "situationNumber": "SKY:SituationNumber:TX1232152",
+        "summary": [
+          {
+            "language": null,
+            "value": "Omkøyring og endringar pga. stengd veg"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Endringar og omkøyring fra 1. desember pga. stengd veg ved Myking. Sjå skyss.no for meir info."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-11-26T14:03:00+01:00",
+          "endTime": "2025-12-24T21:28:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzQ1",
+        "situationNumber": "SKY:SituationNumber:TX1227745",
+        "summary": [
+          {
+            "language": null,
+            "value": "Svelgen bru haldeplass flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplassen Svelgen bru i retning Ågotnes er flytta ca. 50 meter nord.     "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-17T06:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyMTUw",
+        "situationNumber": "SKY:SituationNumber:TX1232150",
+        "summary": [
+          {
+            "language": null,
+            "value": "Omkøyring og endringar pga. stengd veg"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Fra 1. desember: stengt vei mellom Myking og Fitje. Omkjøring via Hosanger."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-11-26T14:03:00+01:00",
+          "endTime": "2025-12-24T21:28:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI4OTk4",
+        "situationNumber": "SKY:SituationNumber:TX1228998",
+        "summary": [
+          {
+            "language": null,
+            "value": "NB! Vent ved Salhus kai på tre møtende busser som kommer fra Hordvik/Tellevikvegen."
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": ""
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-29T07:27:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMwMjUw",
+        "situationNumber": "SKY:SituationNumber:TX1230250",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Klyve kryss mot Øystese stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå mandag 27.oktober vil haldeplass Klyve kryss retning Øystese vere stengd på grunn av vegarbeid. Dette gjeld circa i to månader.Alternativ haldeplass er Fyksesund aust."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-24T14:21:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzQz",
+        "situationNumber": "SKY:SituationNumber:TX1227743",
+        "summary": [
+          {
+            "language": null,
+            "value": "Svelgen bru haldeplass flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplassen Svelgen bru i retning Ågotnes er flytta ca. 50 meter nord. <br><br><a href=\"https://www.skyss.no/contentassets/adeb86eefaf84f7294a9a4287047cdeb/svelgen-bru-1.png?width=556&quality=80\">Klikk her for kart</a>"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-17T06:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyMTUx",
+        "situationNumber": "SKY:SituationNumber:TX1232151",
+        "summary": [
+          {
+            "language": null,
+            "value": "Omkøyring og endringar pga. stengd veg"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Endringar og omkøyring fra 1. desember pga. stengd veg ved Myking. Sjå skyss.no"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-11-26T14:03:00+01:00",
+          "endTime": "2025-12-24T21:28:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzQ0",
+        "situationNumber": "SKY:SituationNumber:TX1227744",
+        "summary": [
+          {
+            "language": null,
+            "value": "Svelgen bru haldeplass flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplassen Svelgen bru i retning Ågotnes er flytta ca. 50 meter nord.  Sjå skyss.no/avvik for kart.    "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-17T06:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjIxOTYx",
+        "situationNumber": "SKY:SituationNumber:TX1221961",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Ludebryggen flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplassen Ludebryggen i retning mot Bergen sentrum er flytta om lag 100m sør."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-09-01T05:30:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyMTQ5",
+        "situationNumber": "SKY:SituationNumber:TX1232149",
+        "summary": [
+          {
+            "language": null,
+            "value": "Omkøyring og endringar pga. stengd veg"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå 1. desember vil ikkje bussen køyre mellom Fitje og Myking på grunn av stengd veg. Omkøyring blir via Fotlandsvåg og Hosanger. <br><br> <a href=\"https://www.skyss.no/avvik/#omk%C3%B8yring_og_bestillingstransport_fr%C3%A5_1__desember_pga__stengd_veg_156341\">For meir info, trykk her.</a>"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-11-26T14:03:00+01:00",
+          "endTime": "2025-12-24T21:28:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3ODAz",
+        "situationNumber": "SKY:SituationNumber:TX1217803",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland, i retning mot Lonevåg, er flytta 100-150 m i retning mot Valestrand. <br><br> Haldeplassen er mellombels flytta i ca. tre måneder på grunn av vegarbeid. <br><br> <a href=\"https://www.skyss.no/contentassets/71b30ef91a584c6b8fbc7f642818ac1a/holdeplasser.png?width=760&quality=80\" target=\"_blank\">Klikk her for kart</a>"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:08:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3ODA0",
+        "situationNumber": "SKY:SituationNumber:TX1217804",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland, i retning mot Lonevåg, er flytta 100-150 m i retning mot Valestrand. Haldeplassen er mellombels flytta i ca. tre måneder på grunn av vegarbeid.Sjå skyss.no/avvik for kart"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:08:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3ODA1",
+        "situationNumber": "SKY:SituationNumber:TX1217805",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Linje 900, 903: Haldeplass Småland er flytta 100-150 m i retning mot Valestrand. Sjå skyss.no/avvik.    "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:08:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMwMjQ5",
+        "situationNumber": "SKY:SituationNumber:TX1230249",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Klyve kryss mot Øystese stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Klyve kryss mot Øystese er stengd. Bruk Fyksesund aust."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-24T14:21:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMwMjQ4",
+        "situationNumber": "SKY:SituationNumber:TX1230248",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Klyve kryss mot Øystese stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Klyve kryss retning Øystese er stengd på grunn av vegarbeid fram til slutten av desember.<br><br>Alternativ haldeplass er Fyksesund aust."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-24T14:21:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3Nzgx",
+        "situationNumber": "SKY:SituationNumber:TX1217781",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland, i retning mot Lonevåg, er flytta 100-150 m i retning mot Valestrand. <br><br> Haldeplassen er mellombels flytta i ca. tre måneder på grunn av vegarbeid."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:02:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3Nzgy",
+        "situationNumber": "SKY:SituationNumber:TX1217782",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland, i retning mot Lonevåg, er flytta 100-150 m i retning mot Valestrand. Haldeplassen er mellombels flytta i ca. tre måneder på grunn av vegarbeid."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:02:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE3Nzgz",
+        "situationNumber": "SKY:SituationNumber:TX1217783",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Haldeplass Småland er flytta 100-150 m i retning mot Valestrand. Sjå skyss.no/avvik."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-06-25T14:02:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjE5Nzg0",
+        "situationNumber": "SKY:SituationNumber:TX1219784",
+        "summary": [
+          {
+            "language": null,
+            "value": "Må bestillast på førehand"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Avgangen må bestillingast innan kl. 15.30 fredag (dagen før) hos Tide buss. Tlf. 53 65 18 23. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-08-04T10:41:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzMz",
+        "situationNumber": "SKY:SituationNumber:TX1227733",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avganger til og fra Turøyna må kjøre via snusløyfe ved Svelgen bru."
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": ""
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-17T06:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzM5",
+        "situationNumber": "SKY:SituationNumber:TX1227739",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Svelgen bru flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå fredag 17. oktober er haldeplass Svelgen bru mot Ågotnes flytta ca. 50 meter lenger nord på grunn av vegarbeid. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-16T13:28:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyNzMy",
+        "situationNumber": "SKY:SituationNumber:TX1232732",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avkorta trasè pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Strekninga mellom Stord sjukehus og Hystad skule er innstilt inntil vidare på grunn av vegarbeid ved Ådland. Turen startar og sluttar på Stord sjukehus."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-01T09:58:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzA1",
+        "situationNumber": "SKY:SituationNumber:TX1233305",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 21.00"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Glaskartunnelen varsla stengd frå kl. 21.00-05.30. Sjå skyss.no/avvik.   "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T20:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyNzMz",
+        "situationNumber": "SKY:SituationNumber:TX1232733",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avkorta trasè pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Linje 676: Stord sjukehus-Hystad skule innstilt inntilt vidare. Sjå skyss.no     "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-01T09:58:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzA0",
+        "situationNumber": "SKY:SituationNumber:TX1233304",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 21.00"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen er varsla stengd kl. 21.00–05.30 i retning mot Åsane/Knarvik på grunn av vedlikehaldsarbeid. Omkøyring via Ervikvegen kan føre til forseinkingar. Haldeplass Eidsvåg E39 blir ikkje brukt medan vegen er stengt. Bruk haldeplass Eidsvåg i Ervikveien.Linje 27: Haldeplass Tertneskrysset E39 blir ikkje brukt medan vegen er stengd. Bruk haldeplass Tertneskrysset."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T20:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMxMjY3",
+        "situationNumber": "SKY:SituationNumber:TX1231267",
+        "summary": [
+          {
+            "language": null,
+            "value": "Utslettevegen stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Utslettevegen stengd, omkøyring via Nysætervegen. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-08-11T05:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzAz",
+        "situationNumber": "SKY:SituationNumber:TX1233303",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 21.00"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Linje 3, 4, 27, 300, 925, 930: Glaskar- og Selviktunnelen varsla stengd kl. 21.00–05.30. Sjå skyss.no/avvik for meir info.    "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T20:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzAy",
+        "situationNumber": "SKY:SituationNumber:TX1233302",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 21.00"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen er varsla stengd kl. 21.00–05.30 i retning mot Åsane/Knarvik på grunn av vedlikehaldsarbeid. Omkøyring via Ervikvegen kan føre til forseinkingar. <br><br> Haldeplass Eidsvåg E39 blir ikkje brukt medan vegen er stengd. Bruk haldeplass Eidsvåg i Ervikveien. <br><br>Linje 27: Haldeplass Tertneskrysset E39 blir ikkje brukt medan vegen er stengd. Bruk haldeplass Tertneskrysset.<br><br><a href=https://www.skyss.no/globalassets/avvik-i-kollektivtrafikken/stengte-tunneler/glaskar-og-selviktunnelen-stengt_eidsvag-mot-asane.png>For kart, trykk her.</a>"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T20:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMxMjY1",
+        "situationNumber": "SKY:SituationNumber:TX1231265",
+        "summary": [
+          {
+            "language": null,
+            "value": "Utslettevegen stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå 11. august køyrer alle avgangar via Nysætervegen i begge retningar på grunn av vegarbeid. Utslettevegen er stengd. <br> <br> Skulebussar mellom Sagvåg og Nysæter køyrer via Åsamyrvegen og snur ved Nysæter ungdsomskule medan arbeidet føregår. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-08-11T05:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzQx",
+        "situationNumber": "SKY:SituationNumber:TX1227741",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Svelgen bru flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå fredag 17. oktober er haldeplass Svelgen bru flytta ca. 50 meter lenger nord."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-16T13:28:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMxMjY2",
+        "situationNumber": "SKY:SituationNumber:TX1231266",
+        "summary": [
+          {
+            "language": null,
+            "value": "Utslettevegen stengd"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Omkøyring via Nysætervegen i begge retningar pga. vegarbeid. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-08-11T05:00:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjIyNTcw",
+        "situationNumber": "SKY:SituationNumber:TX1222570",
+        "summary": [
+          {
+            "language": null,
+            "value": "Forseinkingar mellom Norheimsund–Kvanndal pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "På grunn av vegarbeid er fv. 47 periodevis stengd ved Laupsa og Fyksesundet. Turer frå Norheimsund til Kvanndal kan bli forseinka og miste ferjeavgang frå Kvanndal til Utne. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-09-04T08:35:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjI3NzQw",
+        "situationNumber": "SKY:SituationNumber:TX1227740",
+        "summary": [
+          {
+            "language": null,
+            "value": "Haldeplass Svelgen bru flytta"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Frå fredag 17. oktober er haldeplass Svelgen bru mot Ågotnes flytta ca. 50 meter lenger nord på grunn av vegarbeid. "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-10-16T13:28:00+02:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyNzM2",
+        "situationNumber": "SKY:SituationNumber:TX1232736",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avkorta trasè pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Strekninga mellom Stord sjukehus og Hystad skule er innstilt inntil vidare på grunn av vegarbeid ved Ådland. Turen startar og sluttar på Stord sjukehus. <br><br><a href=https://www.skyss.no/globalassets/avvik-i-kollektivtrafikken/sunnhordland/l-676-stord-1.png>For kart, trykk her.</a>"
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-01T09:58:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzA5",
+        "situationNumber": "SKY:SituationNumber:TX1233309",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 00.01"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Glaskar-/Selviktunnelen varsla stengd. Omkøyring kan føre til forseinkingar.   "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T23:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMxNjY5",
+        "situationNumber": "SKY:SituationNumber:TX1231669",
+        "summary": [
+          {
+            "language": null,
+            "value": "Endringar i rutetider på linja frå måndag 5. januar. Alle avgangar får ny avgangstid 3 minutt seinare. Sjå oppdaterte tider i reiseplanleggeren eller ny rutetabell på skyss.no."
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": ""
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-31T12:00:00+01:00",
+          "endTime": "2026-01-07T13:00:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzA4",
+        "situationNumber": "SKY:SituationNumber:TX1233308",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 00.01"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Linje 3, 4, 27, 300: Glaskartunnelen varsla stengd kl. 00.01-05.30. Omkøyring kan føre til forseinkingar.   "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T23:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyNzM0",
+        "situationNumber": "SKY:SituationNumber:TX1232734",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avkorta trasè pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Innstilt på strekninga Stord sjukehus-Hystad skule på grunn av utfordringar med vegarbeid. Gjeld inntil vidare."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-01T09:58:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OkdDTzpTaXR1YXRpb25OdW1iZXI6bXJmXzI0ODAzODQzX25vcm1hbF8zNDA",
+        "situationNumber": "GCO:SituationNumber:mrf_24803843_normal_340",
+        "summary": [
+          {
+            "language": null,
+            "value": "Trafikkmelding"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Avgangen som skulle gått 20:20 gikk 5 minutter før oppsatt rutetid pga AMK oppdrag Mvh Fjord1 på vegner av Skyss."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-06T20:19:05+01:00",
+          "endTime": "2025-12-07T20:19:05+01:00"
+        },
+        "reportType": "general",
+        "severity": "noImpact",
+        "affects": [
+          {
+            "line": {
+              "id": "SKY:Line:1020",
+              "publicCode": "1020",
+              "name": "Hatvik - Venjaneset"
+            }
+          }
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMzMzA3",
+        "situationNumber": "SKY:SituationNumber:TX1233307",
+        "summary": [
+          {
+            "language": null,
+            "value": "Glaskar- og Selviktunnelen varsla stengd frå kl. 00.01"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "E39 Glaskar- og Selviktunnelen er varsla stengd kl. 00.01-05.30 i retning mot sentrum på grunn av vedlikehaldsarbeid. Omkøyring via Ervikvegen kan føre til forseinkingar.  "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-07T23:45:00+01:00",
+          "endTime": "2025-12-08T05:30:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMxNjY3",
+        "situationNumber": "SKY:SituationNumber:TX1231667",
+        "summary": [
+          {
+            "language": null,
+            "value": "Endring i rutetider"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Endringar i rutetider og haldeplassar på linja frå måndag  5. januar. Mange avgangar til Mulen har endringar på første haldeplass, det vil seie endring i kva avgangar som startar på Mindeveien snuplass og på Wergeland. Sjå oppdaterte tider i reiseplanleggeren eller ny rutetabell på skyss.no."
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-31T12:00:00+01:00",
+          "endTime": "2026-01-07T13:00:00+01:00"
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": "UHRTaXR1YXRpb25FbGVtZW50OlNLWTpTaXR1YXRpb25OdW1iZXI6VFgxMjMyNzM1",
+        "situationNumber": "SKY:SituationNumber:TX1232735",
+        "summary": [
+          {
+            "language": null,
+            "value": "Avkorta trasè pga. vegarbeid"
+          }
+        ],
+        "description": [
+          {
+            "language": null,
+            "value": "Stord sjukehus-Hystad skule innstilt inntilt vidare. Sjå skyss.no for meir informasjon.     "
+          }
+        ],
+        "validityPeriod": {
+          "startTime": "2025-12-01T09:58:00+01:00",
+          "endTime": null
+        },
+        "reportType": "incident",
+        "severity": "normal",
+        "affects": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      }
+    ]
+  }
+}
