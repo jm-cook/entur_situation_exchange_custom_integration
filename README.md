@@ -171,6 +171,49 @@ logger:
 
 Note: The filters option requires Home Assistant 2023.4 or later. For older versions, the disruptions will only appear in the main `home-assistant.log` file.
 
+## Rate Limiting and Throttle Handling
+
+The integration implements smart throttle handling to protect against API rate limits and keep your sensors available during temporary issues.
+
+### How It Works
+
+**Normal Operation:**
+- Polls Entur API every 60 seconds (well within the 4 requests/minute limit)
+- Each successful update refreshes all monitored lines
+
+**If Rate Limited (429 Error):**
+1. **Smart Back-off**: Automatically increases polling interval
+   - First throttle: waits 2 minutes before retry
+   - Repeated throttles: exponentially increases to max 10 minutes
+   - Resets to normal (60s) after 30 minutes of successful polling
+   
+2. **State Preservation**: Sensors **stay available** showing last known data
+   - No "unavailable" state during cooldown period
+   - Prevents unwanted automation triggers
+   - Maintains service status visibility
+
+3. **Automatic Recovery**: Resumes normal polling once API accepts requests again
+
+### Log Messages
+
+You'll see these messages if throttling occurs:
+
+```
+WARNING: Rate limit hit (429 Too Many Requests) - throttle event #1. Applying 120 second back-off. Will retry after cooldown. Preserving last known state to keep sensors available.
+
+INFO: API access recovered after throttling (back-off ended)
+```
+
+### Why Throttling Might Occur
+
+Even with 60-second intervals, throttling can happen due to:
+- Multiple Home Assistant instances using the same API
+- Config flow validations during setup/reconfiguration
+- Network issues causing request retries
+- Shared API quota across your network
+
+The smart back-off ensures the integration handles these situations gracefully without manual intervention.
+
 ## Example Dashboard Configuration
 
 ### Basic Status Card

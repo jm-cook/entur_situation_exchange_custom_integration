@@ -5,12 +5,21 @@ from datetime import datetime, timedelta
 import logging
 from typing import Any
 
+import aiohttp
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import EnturSXApiClient
-from .const import DOMAIN, UPDATE_INTERVAL
+from .const import (
+    BACKOFF_INITIAL,
+    BACKOFF_MAX,
+    BACKOFF_MULTIPLIER,
+    BACKOFF_RESET_AFTER,
+    DOMAIN,
+    UPDATE_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 _DISRUPTION_LOGGER = logging.getLogger(f"{__name__}.disruptions")
@@ -34,20 +43,97 @@ class EnturSXDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         
         # Track active disruptions to detect changes
         self._previous_disruptions: dict[str, set[str]] = {}
+        
+        # Throttle/back-off management
+        self._throttle_count = 0
+        self._last_success_time: datetime | None = None
+        self._in_backoff = False
+        self._cached_data: dict[str, Any] | None = None
 
     async def _async_update_data(self) -> dict[str, Any]:
-        """Fetch data from Entur API."""
+        """Fetch data from Entur API with smart throttle handling."""
         try:
             data = await self.api.async_get_deviations()
             _LOGGER.debug("Fetched data for %d lines", len(data))
+            
+            # Success - reset throttle tracking
+            if self._in_backoff:
+                _LOGGER.info(
+                    "API access recovered after throttling (back-off ended)"
+                )
+                self._in_backoff = False
+                # Reset update interval to normal
+                self.update_interval = timedelta(seconds=UPDATE_INTERVAL)
+                _LOGGER.debug("Update interval reset to %d seconds", UPDATE_INTERVAL)
+            
+            # Reset throttle count if enough time has passed
+            if self._last_success_time:
+                time_since_success = (
+                    datetime.now() - self._last_success_time
+                ).total_seconds()
+                if time_since_success > BACKOFF_RESET_AFTER:
+                    if self._throttle_count > 0:
+                        _LOGGER.debug(
+                            "Resetting throttle count after %d seconds of success",
+                            time_since_success,
+                        )
+                    self._throttle_count = 0
+            
+            self._last_success_time = datetime.now()
+            self._cached_data = data
             
             # Track disruption changes
             self._track_disruption_changes(data)
             
             return data
+        except aiohttp.ClientResponseError as err:
+            if err.status == 429:
+                # Rate limit hit - apply back-off
+                return await self._handle_throttle(err)
+            _LOGGER.error("Error updating Entur SX data: %s", err)
+            raise UpdateFailed(f"Error communicating with Entur API: {err}") from err
         except Exception as err:
             _LOGGER.error("Error updating Entur SX data: %s", err)
             raise UpdateFailed(f"Error communicating with Entur API: {err}") from err
+    
+    async def _handle_throttle(self, err: aiohttp.ClientResponseError) -> dict[str, Any]:
+        """Handle 429 rate limit with exponential back-off and state preservation.
+        
+        Returns cached data if available to keep sensors alive during cooldown.
+        """
+        self._throttle_count += 1
+        self._in_backoff = True
+        
+        # Calculate back-off time with exponential increase
+        backoff_time = min(
+            BACKOFF_INITIAL * (BACKOFF_MULTIPLIER ** (self._throttle_count - 1)),
+            BACKOFF_MAX,
+        )
+        
+        _LOGGER.warning(
+            "Rate limit hit (429 Too Many Requests) - throttle event #%d. "
+            "Applying %d second back-off. Will retry after cooldown. "
+            "Preserving last known state to keep sensors available.",
+            self._throttle_count,
+            backoff_time,
+        )
+        
+        # Adjust update interval for back-off period
+        self.update_interval = timedelta(seconds=backoff_time)
+        
+        # Return cached data to preserve sensor state
+        if self._cached_data is not None:
+            _LOGGER.debug(
+                "Returning cached data with %d lines during back-off",
+                len(self._cached_data),
+            )
+            return self._cached_data
+        
+        # No cache available - this should only happen on first fetch
+        _LOGGER.error(
+            "No cached data available during throttle. Sensors may become unavailable."
+        )
+        raise UpdateFailed(f"Rate limit exceeded and no cached data: {err}") from err
     
     def _track_disruption_changes(self, data: dict[str, Any]) -> None:
         """Track when disruptions appear and disappear."""

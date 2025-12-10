@@ -18,7 +18,12 @@ jobs:
 
       - name: Get release version
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          # Extract version from tag and remove leading 'v' if present
+          TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_VERSION#v}"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag: $TAG_VERSION -> Version: $VERSION"
 
       - name: Find integration domain
         id: find_domain

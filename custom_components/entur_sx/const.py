@@ -14,6 +14,12 @@ DEFAULT_CREATE_SUMMARY_SENSORS = True
 DEFAULT_SUMMARY_ICON = "mdi:bus-alert"
 UPDATE_INTERVAL = 60  # seconds
 
+# Back-off configuration for rate limiting
+BACKOFF_INITIAL = 120  # 2 minutes on first throttle
+BACKOFF_MULTIPLIER = 2.5  # Exponential increase
+BACKOFF_MAX = 600  # Max 10 minutes
+BACKOFF_RESET_AFTER = 1800  # Reset to normal after 30 min of success
+
 # Icon options for summary sensors
 SUMMARY_ICON_OPTIONS = [
     "mdi:bus-alert",
