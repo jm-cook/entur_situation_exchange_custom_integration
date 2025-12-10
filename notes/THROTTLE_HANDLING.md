@@ -31,6 +31,12 @@ Instead of sensors becoming "unavailable", the integration:
 - Resets update interval back to normal (60 seconds)
 - Continues normal operation
 
+### 4. Request History Tracking (NEW)
+- Maintains a rolling buffer of the last 10 requests
+- Only logged when throttling occurs (not during normal operation)
+- Includes timestamp, duration, status, and result for each request
+- Helps diagnose what led to the throttle (e.g., rapid requests, timing patterns)
+
 ## Code Changes
 
 ### custom_components/entur_sx/const.py
@@ -52,9 +58,15 @@ self._throttle_count = 0
 self._last_success_time: datetime | None = None
 self._in_backoff = False
 self._cached_data: dict[str, Any] | None = None
+
+# Request history tracking (for diagnostics when throttled)
+self._request_history: deque = deque(maxlen=10)
 ```
 
 #### Enhanced _async_update_data Method
+- Records timestamp and duration for every request
+- Tracks successful requests: timestamp, duration_ms, status, lines_count
+- Tracks failed requests: timestamp, duration_ms, status (error_429), error message
 - Catches `aiohttp.ClientResponseError` with status 429
 - Calls `_handle_throttle()` for smart back-off
 - Caches successful data
@@ -65,6 +77,7 @@ self._cached_data: dict[str, Any] | None = None
 - Increments throttle counter
 - Calculates exponential back-off time
 - Adjusts coordinator update interval
+- **Dumps last 10 requests with full details to logs**
 - Returns cached data to preserve sensor state
 - Logs detailed warning with throttle event number
 
@@ -108,10 +121,23 @@ Created `tests/test_throttle_backoff.py` with test cases for:
    WARNING: Rate limit hit (429 Too Many Requests) - throttle event #1. 
    Applying 120 second back-off. Will retry after cooldown. 
    Preserving last known state to keep sensors available.
+   
+   WARNING: Request history (last 10 requests leading to throttle):
+   WARNING:   #1: 2025-12-10 00:06:15.588 | provider=SKY | status=success | duration=305.3ms | lines=24
+   WARNING:   #2: 2025-12-10 00:07:15.588 | provider=SKY | status=success | duration=315.3ms | lines=24
+   WARNING:   #3: 2025-12-10 00:08:15.588 | provider=SKY | status=success | duration=325.3ms | lines=24
+   WARNING:   #4: 2025-12-10 00:09:15.588 | provider=SKY | status=success | duration=335.3ms | lines=24
+   WARNING:   #5: 2025-12-10 00:10:15.588 | provider=SKY | status=success | duration=345.3ms | lines=24
+   WARNING:   #6: 2025-12-10 00:11:15.588 | provider=SKY | status=success | duration=355.3ms | lines=24
+   WARNING:   #7: 2025-12-10 00:12:15.588 | provider=SKY | status=success | duration=365.3ms | lines=24
+   WARNING:   #8: 2025-12-10 00:13:15.588 | provider=SKY | status=success | duration=375.3ms | lines=24
+   WARNING:   #9: 2025-12-10 00:14:15.588 | provider=SKY | status=success | duration=385.3ms | lines=24
+   WARNING:   #10: 2025-12-10 00:15:14.588 | provider=SKY | status=error_429 | duration=125.7ms | error=Too Many Requests
    ```
    - Waits 2 minutes
    - Sensors show last known disruptions
    - No "unavailable" state
+   - **Request history shows timing and patterns leading to throttle**
 
 2. **If throttled again**:
    - Increases wait time to 5 minutes, then 10 minutes (max)
@@ -176,6 +202,21 @@ custom_components.entur_sx.coordinator: INFO: API access recovered after throttl
 # When count resets (debug level)
 custom_components.entur_sx.coordinator: DEBUG: Resetting throttle count after N seconds of success
 ```
+
+### Provider Field in Request History
+
+Each request log includes the provider/operator code (SKY, RUT, ATB, etc.) or "ALL" if querying all operators. This is especially useful when:
+
+**Multiple Integration Instances:**
+If you have separate integrations for different operators, you can identify which one hit the rate limit:
+```
+WARNING:   #1: 08:00:00.000 | provider=SKY | status=success | duration=250ms | lines=24
+WARNING:   #2: 08:01:00.000 | provider=RUT | status=success | duration=280ms | lines=18
+WARNING:   #3: 08:02:00.000 | provider=SKY | status=success | duration=245ms | lines=24
+```
+
+**Shared Network/IP:**
+If multiple Home Assistant users on the same network (same public IP) are querying the same provider, you'll see which provider is affected.
 
 ## Possible Causes of Throttling
 

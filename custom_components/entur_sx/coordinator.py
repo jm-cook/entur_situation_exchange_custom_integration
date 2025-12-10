@@ -1,6 +1,7 @@
 """DataUpdateCoordinator for Entur Situation Exchange."""
 from __future__ import annotations
 
+from collections import deque
 from datetime import datetime, timedelta
 import logging
 from typing import Any
@@ -49,11 +50,27 @@ class EnturSXDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._last_success_time: datetime | None = None
         self._in_backoff = False
         self._cached_data: dict[str, Any] | None = None
+        
+        # Request history tracking (for diagnostics when throttled)
+        self._request_history: deque = deque(maxlen=10)
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from Entur API with smart throttle handling."""
+        request_start = datetime.now()
         try:
             data = await self.api.async_get_deviations()
+            request_end = datetime.now()
+            duration_ms = (request_end - request_start).total_seconds() * 1000
+            
+            # Log successful request in history
+            self._request_history.append({
+                "timestamp": request_start.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
+                "duration_ms": round(duration_ms, 1),
+                "status": "success",
+                "lines_count": len(data),
+                "provider": self.api._operator or "ALL",
+            })
+            
             _LOGGER.debug("Fetched data for %d lines", len(data))
             
             # Success - reset throttle tracking
@@ -87,8 +104,20 @@ class EnturSXDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             
             return data
         except aiohttp.ClientResponseError as err:
+            request_end = datetime.now()
+            duration_ms = (request_end - request_start).total_seconds() * 1000
+            
+            # Log failed request in history
+            self._request_history.append({
+                "timestamp": request_start.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
+                "duration_ms": round(duration_ms, 1),
+                "status": f"error_{err.status}",
+                "error": str(err.message) if hasattr(err, 'message') else str(err),
+                "provider": self.api._operator or "ALL",
+            })
+            
             if err.status == 429:
-                # Rate limit hit - apply back-off
+                # Rate limit hit - apply back-off and dump history
                 return await self._handle_throttle(err)
             _LOGGER.error("Error updating Entur SX data: %s", err)
             raise UpdateFailed(f"Error communicating with Entur API: {err}") from err
@@ -110,6 +139,7 @@ class EnturSXDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             BACKOFF_MAX,
         )
         
+        # Log the throttle event with request history
         _LOGGER.warning(
             "Rate limit hit (429 Too Many Requests) - throttle event #%d. "
             "Applying %d second back-off. Will retry after cooldown. "
@@ -117,6 +147,25 @@ class EnturSXDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._throttle_count,
             backoff_time,
         )
+        
+        # Dump request history to help diagnose what led to throttling
+        if self._request_history:
+            _LOGGER.warning(
+                "Request history (last %d requests leading to throttle):",
+                len(self._request_history),
+            )
+            for i, req in enumerate(self._request_history, 1):
+                _LOGGER.warning(
+                    "  #%d: %s | provider=%s | status=%s | duration=%sms%s",
+                    i,
+                    req.get("timestamp", "unknown"),
+                    req.get("provider", "?"),
+                    req.get("status", "unknown"),
+                    req.get("duration_ms", "?"),
+                    f" | lines={req['lines_count']}" if "lines_count" in req else f" | error={req.get('error', 'unknown')}",
+                )
+        else:
+            _LOGGER.warning("No request history available (first request?)")
         
         # Adjust update interval for back-off period
         self.update_interval = timedelta(seconds=backoff_time)

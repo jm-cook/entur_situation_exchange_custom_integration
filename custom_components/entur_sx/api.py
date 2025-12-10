@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
+import uuid
 from datetime import datetime
 from typing import Any
 
@@ -12,6 +14,73 @@ import async_timeout
 from .const import API_BASE_URL, API_GRAPHQL_URL, CODESPACE_NAMES, STATE_NORMAL, STATUS_EXPIRED, STATUS_PLANNED, STATUS_OPEN
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class RateLimitTracker:
+    """Track API rate limits from response headers."""
+    
+    def __init__(self):
+        """Initialize rate limit tracker."""
+        self.allowed: int = 5  # Default: 5 requests per minute
+        self.available: int = 5
+        self.used: int = 0
+        self.expiry_time: str | None = None
+        self.last_request_time: float = 0.0
+        self.min_interval_ms: int = 100  # Spike arrest: 1 req per 100ms
+        
+    def update_from_headers(self, headers: dict) -> None:
+        """Update rate limit info from response headers.
+        
+        Args:
+            headers: Response headers containing rate-limit-* fields
+        """
+        if "rate-limit-allowed" in headers:
+            self.allowed = int(headers["rate-limit-allowed"])
+        if "rate-limit-available" in headers:
+            self.available = int(headers["rate-limit-available"])
+        if "rate-limit-used" in headers:
+            self.used = int(headers["rate-limit-used"])
+        if "rate-limit-expiry-time" in headers:
+            self.expiry_time = headers["rate-limit-expiry-time"]
+            
+        # Log when getting close to limit
+        if self.available <= 1:
+            _LOGGER.warning(
+                "Rate limit nearly exhausted: %d/%d requests remaining until %s",
+                self.available,
+                self.allowed,
+                self.expiry_time
+            )
+        elif self.available <= 2:
+            _LOGGER.info(
+                "Rate limit info: %d/%d requests remaining until %s",
+                self.available,
+                self.allowed,
+                self.expiry_time
+            )
+    
+    async def wait_if_needed(self, delay_ms: int = 200) -> None:
+        """Wait if necessary to respect spike arrest limits.
+        
+        Args:
+            delay_ms: Minimum milliseconds between requests (default 200ms for safety margin)
+        """
+        if self.last_request_time > 0:
+            elapsed_ms = (time.time() - self.last_request_time) * 1000
+            if elapsed_ms < delay_ms:
+                wait_ms = delay_ms - elapsed_ms
+                _LOGGER.debug("Rate limit: waiting %.0fms before next request", wait_ms)
+                await asyncio.sleep(wait_ms / 1000)
+        
+        self.last_request_time = time.time()
+    
+    def can_make_request(self) -> bool:
+        """Check if we have quota available.
+        
+        Returns:
+            True if we can safely make a request
+        """
+        return self.available > 0
 
 
 class EnturSXApiClient:
@@ -31,6 +100,7 @@ class EnturSXApiClient:
         self._operator = operator
         self._lines = lines or []
         self._session: aiohttp.ClientSession | None = None
+        self._rate_limiter = RateLimitTracker()
 
         # The operator is now the codespace directly (e.g., "SKY", "SOF")
         # This is what we use for the SIRI-SX datasetId parameter
@@ -48,6 +118,10 @@ class EnturSXApiClient:
     async def async_get_deviations(self) -> dict[str, Any]:
         """Fetch deviation data for configured lines.
         
+        Handles pagination when MoreData=true using requestorId to retrieve
+        all situations in extreme weather scenarios (flooding, heavy snow).
+        Respects rate limits from API headers (5 req/min, 200ms between requests).
+        
         Returns:
             Dict mapping line reference to list of deviations with status, e.g.
             {"SKY:Line:1": [{"valid_from": "...", "valid_to": "...", "summary": "...", 
@@ -58,20 +132,110 @@ class EnturSXApiClient:
             return {}
 
         headers = {"Content-Type": "application/json"}
+        
+        # Generate requestorId for pagination tracking
+        requestor_id = str(uuid.uuid4())
+        all_situations = []
+        page_count = 0
+        max_pages = 20  # Safety limit to prevent infinite loops
 
         try:
             async with async_timeout.timeout(30):
-                async with self._session.get(
-                    self._service_url, headers=headers
-                ) as response:
-                    response.raise_for_status()
-                    # API returns JSON but with incorrect content-type header sometimes
-                    # Use text() and json.loads() to handle this
-                    text = await response.text()
-                    import json
-                    data = json.loads(text)
+                while page_count < max_pages:
+                    # Check rate limit quota before making request
+                    if not self._rate_limiter.can_make_request():
+                        _LOGGER.warning(
+                            "Rate limit quota exhausted (%d/%d available). Stopping pagination at page %d.",
+                            self._rate_limiter.available,
+                            self._rate_limiter.allowed,
+                            page_count
+                        )
+                        break
+                    
+                    # Wait to respect spike arrest (200ms between requests)
+                    await self._rate_limiter.wait_if_needed(delay_ms=200)
+                    
+                    page_count += 1
+                    
+                    # Add requestorId parameter for pagination
+                    url = f"{self._service_url}&requestorId={requestor_id}" if "?" in self._service_url else f"{self._service_url}?requestorId={requestor_id}"
+                    
+                    async with self._session.get(url, headers=headers) as response:
+                        response.raise_for_status()
+                        
+                        # Update rate limit tracking from response headers
+                        self._rate_limiter.update_from_headers(response.headers)
+                        
+                        # API returns JSON but with incorrect content-type header sometimes
+                        # Use text() and json.loads() to handle this
+                        text = await response.text()
+                        import json
+                        data = json.loads(text)
 
-                    return self._parse_response(data)
+                        # Extract situations from this page
+                        service_delivery = data.get("Siri", {}).get("ServiceDelivery", {})
+                        sx_delivery = service_delivery.get("SituationExchangeDelivery", [])
+                        
+                        if sx_delivery:
+                            situations_obj = sx_delivery[0].get("Situations", {})
+                            situations = situations_obj.get("PtSituationElement", [])
+                            
+                            # Ensure it's a list
+                            if not isinstance(situations, list):
+                                situations = [situations]
+                            
+                            all_situations.extend(situations)
+                            
+                            _LOGGER.debug(
+                                "Retrieved page %d: %d situations (total so far: %d). Rate limit: %d/%d remaining",
+                                page_count,
+                                len(situations),
+                                len(all_situations),
+                                self._rate_limiter.available,
+                                self._rate_limiter.allowed
+                            )
+
+                        # Check for MoreData flag
+                        more_data = service_delivery.get("MoreData", False)
+                        
+                        if more_data:
+                            _LOGGER.info(
+                                "MoreData=true, fetching next page (page %d, %d situations retrieved so far). Operator: %s. Rate limit: %d/%d",
+                                page_count,
+                                len(all_situations),
+                                self._operator_code or "all",
+                                self._rate_limiter.available,
+                                self._rate_limiter.allowed
+                            )
+                            # Continue loop to fetch next page with same requestorId
+                        else:
+                            # No more data, we're done
+                            if page_count > 1:
+                                _LOGGER.info(
+                                    "Pagination complete: retrieved %d situations across %d pages. Operator: %s",
+                                    len(all_situations),
+                                    page_count,
+                                    self._operator_code or "all"
+                                )
+                            break
+                
+                if page_count >= max_pages:
+                    _LOGGER.warning(
+                        "Reached maximum page limit (%d pages) - some disruptions may be missing. "
+                        "Retrieved %d situations. Operator: %s",
+                        max_pages,
+                        len(all_situations),
+                        self._operator_code or "all"
+                    )
+
+                # Reconstruct response with all situations
+                if page_count > 1:
+                    # Multiple pages - merge all situations
+                    data["Siri"]["ServiceDelivery"]["SituationExchangeDelivery"][0]["Situations"]["PtSituationElement"] = all_situations
+                    # Set MoreData to false since we've fetched everything
+                    data["Siri"]["ServiceDelivery"]["MoreData"] = False
+                
+                return self._parse_response(data)
 
         except asyncio.TimeoutError as err:
             _LOGGER.error("Timeout fetching data from Entur API: %s", err)
