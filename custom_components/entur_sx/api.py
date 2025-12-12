@@ -372,30 +372,15 @@ class EnturSXApiClient:
                 if items:
                     status_priority = {STATUS_OPEN: 0, STATUS_PLANNED: 1, STATUS_EXPIRED: 2}
                     items.sort(key=lambda x: (status_priority.get(x["status"], 3), -datetime.fromisoformat(x["valid_from"]).timestamp()))
-                else:
-                    # No situation for this line, set default
-                    items.append({
-                        "valid_from": datetime.now().isoformat(),
-                        "valid_to": None,
-                        "summary": STATE_NORMAL,
-                        "description": STATE_NORMAL,
-                        "status": STATUS_OPEN,
-                        "progress": "normal",
-                    })
+                # If no situations for this line, leave items as empty list
+                # The sensor layer will display "Normal service" for empty lists
 
                 allitems_dict[look_for] = items
 
             except Exception as err:
                 _LOGGER.error("Error parsing data for line %s: %s", look_for, err, exc_info=True)
-                # Add default entry on error
-                allitems_dict[look_for] = [{
-                    "valid_from": datetime.now().isoformat(),
-                    "valid_to": None,
-                    "summary": STATE_NORMAL,
-                    "description": STATE_NORMAL,
-                    "status": STATUS_OPEN,
-                    "progress": "error",
-                }]
+                # Return empty list on error - sensor will show "Normal service"
+                allitems_dict[look_for] = []
 
         _LOGGER.debug("Parsed deviations for %d lines", len(allitems_dict))
         return allitems_dict

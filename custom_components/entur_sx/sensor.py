@@ -138,8 +138,7 @@ class EnturSXSensor(
             return None
 
         line_data = self.coordinator.data.get(self.line_ref, [])
-        if not line_data:
-            return None
+        # Empty line_data means no disruptions - will return STATE_NORMAL below
 
         # Filter to only active (open) disruptions that are within
         # their time window
@@ -300,11 +299,14 @@ class EnturSXSummarySensor(
         active_count = 0
         for line_ref in self.lines:
             line_data = self.coordinator.data.get(line_ref, [])
-            if line_data and line_data[0].get("summary") != STATE_NORMAL:
-                status = line_data[0].get("status")
-                # Only count active (open) disruptions in state
-                if status == STATUS_OPEN:
-                    active_count += 1
+            # Empty line_data means no disruptions for this line
+            if not line_data:
+                continue
+                
+            # Check if line has active (open) disruptions
+            status = line_data[0].get("status")
+            if status == STATUS_OPEN:
+                active_count += 1
 
         if active_count == 0:
             return STATE_NORMAL
