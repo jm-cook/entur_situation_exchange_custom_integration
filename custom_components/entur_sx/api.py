@@ -138,12 +138,14 @@ class EnturSXApiClient:
         all_situations = []
         page_count = 0
         max_pages = 20  # Safety limit to prevent infinite loops
+        data = None  # Initialize to handle early breaks
 
         try:
             async with async_timeout.timeout(30):
                 while page_count < max_pages:
-                    # Check rate limit quota before making request
-                    if not self._rate_limiter.can_make_request():
+                    # Check rate limit quota before making request (but not for first page)
+                    # First page always attempts - we need fresh rate limit info from response
+                    if page_count > 0 and not self._rate_limiter.can_make_request():
                         _LOGGER.warning(
                             "Rate limit quota exhausted (%d/%d available). Stopping pagination at page %d.",
                             self._rate_limiter.available,
@@ -153,7 +155,9 @@ class EnturSXApiClient:
                         break
                     
                     # Wait to respect spike arrest (200ms between requests)
-                    await self._rate_limiter.wait_if_needed(delay_ms=200)
+                    # Skip delay before first request in this polling cycle
+                    if page_count > 0:
+                        await self._rate_limiter.wait_if_needed(delay_ms=200)
                     
                     page_count += 1
                     
@@ -227,6 +231,15 @@ class EnturSXApiClient:
                         len(all_situations),
                         self._operator_code or "all"
                     )
+
+                # Handle case where no data was retrieved (rate limit exhausted, etc.)
+                if data is None:
+                    _LOGGER.warning(
+                        "No data retrieved from API (page_count=%d). Returning empty result. Operator: %s",
+                        page_count,
+                        self._operator_code or "all"
+                    )
+                    return {}
 
                 # Reconstruct response with all situations
                 if page_count > 1:
